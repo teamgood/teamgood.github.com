@@ -11,9 +11,11 @@ a {
 .lightblue {
 	color: #ddf0fb;
 }
+.deepred {
+	color: #791515;
+}
 #header,#page {
 	width: 700px;
-
 }
 #headerbg {
 	width: 700px;
