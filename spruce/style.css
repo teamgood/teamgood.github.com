@@ -1,5 +1,5 @@
 body {
-	background: #ababab;
+	background: #CCC;
 	margin: 0px;
 	padding: 0px;
 	font-family: Franklin, Helvetica, Trebuchet, Arial, sans-serif;
@@ -9,10 +9,7 @@ a {
 	outline: none;
 }
 .lightblue {
-	color: #ddf0fb;
-}
-.deepred {
-	color: #791515;
+	color: #c0e4f7;
 }
 #header,#page {
 	width: 700px;
@@ -68,17 +65,31 @@ a {
 	padding: 10px;
 }
 
-#menu a {
+#menu {
 	color: #FFF;
+}
+#menu a {
+	color: #CCC;
 	text-decoration: none;
 }
 #menu a:hover {
+	color: #EEE;
 	text-decoration: underline;
 }
 #page {
 	background: white;
+		-moz-box-shadow: 0 0 10px #444;
+	-webkit-box-shadow: 0 0 10px #444;
+	box-shadow: 0 0 10px #444;
+		-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	border-radius: 10px; 
 }
 #main {
 	padding: 40px 15px 15px 15px;
 	font-size: 11pt;
+}
+
+#main h2 {
+	color: #2c759b;
 }
