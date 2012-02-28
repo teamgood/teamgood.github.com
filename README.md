@@ -1,1 +1,0 @@
-see http://teamgood.github.com/
