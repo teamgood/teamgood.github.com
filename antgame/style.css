@@ -1,0 +1,84 @@
+.welcome {
+  background: white;
+  border-radius: 7px;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  padding-top: 10px;
+  margin-bottom: 10px;
+}
+.welcome hr {
+  margin-top: 0px;
+}
+body {
+  background: #eeeeee;
+  padding-top: 50px;
+  height: 100%;
+}
+.breadcrumb {
+  border-radius: 7px;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+}
+.leftmost {
+  margin-left: 10px;
+}
+.rightmost {
+  margin-right: 10px;
+}
+.screenshot {
+  border-radius: 7px;
+  -moz-border-radius: 7px;
+  -webkit-border-radius: 7px;
+  background: url("./img/screenshot.png");
+  margin-left: 10px;
+  height: 140px;
+}
+.navbar .brand {
+  color: #CCC;
+}
+#loading-bg {
+  position: absolute;
+  margin-top: -50px;
+  width: 100%;
+  height: 100%;
+  z-index: 1051;
+  background: #eeeeee;
+  text-align: center;
+}
+#loading-bar-outer {
+  border: 1px solid #333;
+  width: 100px;
+  height: 10px;
+  margin: 0 auto;
+  padding: 3px;
+}
+#loading-bar-inner {
+  width: 0px;
+  height: 10px;
+  background: #555;
+}
+.ag-sm-name {
+  color: #676767;
+}
+#ag-sm-rounds {
+  text-align: right;
+}
+.padded-icon {
+  padding: 0 10px 0 0;
+}
+#ag-edit-code {
+  width: 100%;
+  font-size: 12pt;
+  font-family: Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
+#ag-wl-thumb {
+  margin-right: 10px;
+  padding-bottom: 10px;
+}
+.btn {
+  -moz-user-select: -moz-none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}

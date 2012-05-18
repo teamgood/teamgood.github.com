@@ -1,38 +1,324 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<link rel="stylesheet" href="../style.css" />
-<title>Team Good - Ant Game</title>
+	<meta charset="utf-8">
+	<title>Ant Game</title>
+	<link rel="stylesheet" type="text/css" href="./bootstrap/css/bootstrap.css" />
+	<link rel="stylesheet" type="text/css" href="./style.css" />
+	<script type="text/javascript">
+	var loadedSomeMore = (function () {
+		var loaded = 0;
+		var numItemsToLoad = 7;
+		var barWidth = 100;
+		return function () {
+			loaded++;
+			document.getElementById("loading-bar-inner").style.width = barWidth*Math.min(Math.floor(loaded/numItemsToLoad),1) + "px";
+		};
+	})();
+	</script>
 </head>
+
 <body>
-
+	<div id="loading-bg">
+		<p>loading...</p>
+		<div id="loading-bar-outer"><div id="loading-bar-inner"></div></div>
+	</div>
 	
-	<div id="page" class="pageCenter">
-		<div id="header">
-			<h1>TEAM <span class="lightblue">GOOD</span></h1>
-		</div>
-		<div id="menu">
-			<ul>
-				<li>
-					<a href="../">Home</a>
-				</li>
-				<li>
-					<a href="../deliverables/">Deliverables</a>
-				</li>
-				<li>
-					Ant Game
-				</li>
-				<li>
-					<a href="../resources.html">Team Resources</a>
-				</li>
-			</ul>
-		</div>
-		<div id="main">
-			<br />
-			Coming soon...
 
+	<div class="navbar navbar-fixed-top">
+		<div class="navbar-inner">
+			<div class="container">
+				<span class="brand">AntGame</span>
+				<ul class="nav ag-menu ag-singleMatch ag-Contest">
+					<li><a href="./tutorial.html">How to Play</a></li>
+				</ul>
+			</div>
 		</div>
 	</div>
+
+
+	<!-- MAIN MENU DEF -->
+	<div class="ag-root container">
+		<div class="row">
+			<div class="span12 welcome">
+				<div class="row">
+					<div class="span4">
+						<div class="screenshot"></div>
+					</div>
+					<div class="span8">
+						<h1>
+							Hello. Yes this is AntGame.
+						</h1>
+						<p>
+							Two teams of ants, black vs red, compete in a bid to gather the most food from a treacherous terrain. Influence the behaviour of your ants by designing a brain which controls how they navigate, what they look for, and how they communicate with each other.
+						</p>
+						<div class="row">
+							<div class="span4">
+								<p>
+									<a class="btn btn-primary btn-large ag-btn-sm">
+										Single Match &raquo;
+									</a>
+								</p>
+								<p>
+									Two brains, one world, one winner.
+								</p>
+							</div>
+							<div class="span4">
+								<p><a class="btn btn-primary btn-large ag-btn-contest">Contest &raquo;</a></p>
+								<p>
+									Many brains, many worlds, contest rules, rankings.
+								</p>
+							</div>
+						</div>
+					</div>
+
+				</div>
+
+			</div>
+		</div>
+	</div>
+	<!-- END MAIN MENU DEF -->
+
+
+	<!-- SINGLE MATCH MENU DEF -->
+	<div class="ag-sm container">
+		<div class="row">
+			<div class="span12 welcome">
+				<div class="row">
+					<div class="span4">
+						<div class="leftmost">
+							<h2>
+								<img src="./img/redant.png"/>
+								Red Brain
+							</h2>
+							<div class="well">
+								<a class="btn btn-primary pull-right" href="#" id="ag-sm-pick-red">Pick &raquo;</a>
+								<h4 class="ag-sm-name" id="ag-sm-red-name">Stupid Brain</h4>
+							</div>
+						</div>
+					</div>
+					<div class="span4">
+						<h2>
+							<img src="./img/blackant.png"/>
+							Black Brain
+						</h2>
+						<div class="well">
+							<a class="btn btn-primary pull-right" href="#" id="ag-sm-pick-black">Pick &raquo;</a>
+							<h4 class="ag-sm-name" id="ag-sm-black-name">Stupid Brain</h4>
+						</div>
+					</div>
+					<div class="span4">
+						<div class="rightmost">
+							<h2>
+								<img src="./img/hexagon.png"/>
+								World
+							</h2>
+							<div class="well">
+								<a class="btn btn-primary pull-right" href="#" id="ag-sm-pick-world">Pick &raquo;</a>
+								<h4 class="ag-sm-name" id="ag-sm-world-name">Random</h4>
+							</div>
+						</div>
+					</div>
+				</div>
+				<hr class="leftmost rightmost"/>
+				<div class="row">
+					<div class="span2">
+						<h3 class="leftmost">
+							<img src="./img/cog.png"/>
+							Settings
+						</h3>
+					</div>
+					<div class="span6">
+						<form class="form-inline">
+							Run for&nbsp;&nbsp;
+							<input type="text" class="input-mini" value="300000" id="ag-sm-rounds" maxlength="6"/>
+							&nbsp;&nbsp;rounds&nbsp;&nbsp;
+							<a class="btn btn-warning" id="ag-sm-vis-on" href="#">with</a>
+							<a class="btn btn-danger" id="ag-sm-vis-off" href="#" style="display: none;">without</a>
+							&nbsp;&nbsp;graphics
+						</form>
+					</div>
+					<div class="span4">
+						<a class="btn btn-success pull-right rightmost" href="#" id="ag-sm-go">Go &raquo;</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- END SINGLE MATCH MENU DEF -->
+
+	<!-- SINGLE MATCH PICK BRAIN DEF -->
+	<div class="ag-bl container">
+		<div class="row">
+			<div class="span12 welcome">
+				<div class="row" style="padding-bottom: 10px;">
+					<div class="span6">
+						<div class="leftmost">
+							<h3 class="pull-left">
+								Available Brains&nbsp;&nbsp;
+							</h3>
+							<a class="btn btn-primary pull-right" id="ag-bl-add">
+								add 
+								<i class="icon-plus-sign icon-white"></i>
+							</a>
+						</div>
+					</div>
+
+					<div class="span6">
+						<div class="rightmost">
+							<h3>
+								Source Code
+							</h3>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="span6">
+						<div class="leftmost well" style="padding: 8px 0;">
+							<ul class="nav nav-list" id="ag-bl-list">
+						
+							</ul>
+						</div>
+					</div>
+
+					<div class="span6">
+						<div class="rightmost">
+							<pre class="pre-scrollable" id="ag-bl-selected-source">
+							</pre>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- END SINGLE MATCH PICK BRAIN DEF -->
+
+	<!-- SINGLE MATCH PICK WORLD DEF -->
+	<div class="ag-wl container">
+		<div class="row">
+			<div class="span12 welcome">
+				<div class="row" style="padding-bottom: 10px;">
+					<div class="span6">
+						<div class="leftmost">
+							<h3 class="pull-left">
+								Available Worlds&nbsp;&nbsp;
+							</h3>
+							<a class="btn btn-success pull-right" id="ag-wl-gen">
+								generate 
+								<i class="icon-plus-sign icon-white"></i>
+							</a>
+							<a class="btn btn-primary pull-right rightmost" id="ag-wl-add">
+								add 
+								<i class="icon-plus-sign icon-white"></i>
+							</a>
+						</div>
+					</div>
+
+					<div class="span6">
+						<div class="rightmost">
+							<h3>
+								Preview
+							</h3>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="span6">
+						<div class="leftmost well" style="padding: 8px 0;">
+							<ul class="nav nav-list" id="ag-wl-list">
+						
+							</ul>
+						</div>
+					</div>
+
+					<div class="span6">
+						<div id="ag-wl-thumb">
+							
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- END SINGLE MATCH PICK WORLD DEF -->
+
+	<div class="modal" id="ag-edit" style="display: none;">
+		<div class="modal-header">
+			<button class="close ag-edit-close">&times;</button>
+			<h3 id="ag-edit-title">Modal header</h3>
+		</div>
+		<div class="modal-body">
+			<form class="form-vertical rightmost">
+				<p>Name</p>
+				<input type="text" id="ag-edit-name" class="large" maxlength="30"/>
+				<p>Source Code</p>
+				<textarea id="ag-edit-code" rows="10"></textarea>
+			</form>
+		</div>
+		<div class="modal-footer">
+			<a href="#" class="btn ag-edit-close" class="btn">Cancel</a>
+			<a href="#" class="btn btn-success" id="ag-edit-compile">Compile &raquo;</a>
+		</div>
+	</div>
+
+	<div id="contestSetup">
+	</div>
+	<div id="game">
+	</div>
+	<div id="makeRandomWorld">
+	</div>
+	<div id="loadBrain">
+	</div>
+
+	<!-- breadcrumbs everywhere, all up in my face -->
+	<div class="container">
+		<ul class="breadcrumb">
+			<li class="ag-root-bc">
+				<a href="#" class="ag-btn-root">Main Menu</a>
+				<span class="divider">/</span>
+			</li>
+			<li class="active ag-root">
+				Main Menu
+			</li>
+			<li class="ag-sm-bc">
+				<a href="#" class="ag-btn-sm">Single Match</a>
+				<span class="divider">/</span>
+			</li>
+			<li class="active ag-sm">
+				Single Match
+			</li>
+			<li class="active ag-bl">
+				Pick Brain
+			</li>
+			<li class="active ag-wl">
+				Pick World
+			</li>
+		</ul>
+	</div>
+
+
+	<script type="text/javascript">loadedSomeMore();</script>
+
+
+
+	<!-- LOAD JAVASCRIPT STUFFS -->
+	<script type="text/javascript" src="./js/jquery1.7.2.min.js"></script>
+	<script type="text/javascript">loadedSomeMore();</script>
+
+	<script type="text/javascript" src="./bootstrap/js/bootstrap-modal.js"></script>
+	<script type="text/javascript">loadedSomeMore();</script>
+
+	<script type="text/javascript" src="./bootstrap/js/bootstrap-button.js"></script>
+	<script type="text/javascript">loadedSomeMore();</script>
+
+	<script type="text/javascript" src="./js/model.js"></script>
+	<script type="text/javascript">loadedSomeMore();</script>
+
+	<script type="text/javascript" src="./js/view.js"></script>
+	<script type="text/javascript">loadedSomeMore();</script>
+
+	<script type="text/javascript" src="./js/controller.js"></script>
+	<script type="text/javascript">loadedSomeMore();</script>
+	
 </body>
 </html>
