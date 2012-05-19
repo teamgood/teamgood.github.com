@@ -13,12 +13,13 @@ function Ant(id, color, brain, world) {
 	this.dir = 0;
 	this.resting = 0;
 	this.food = 0;
+	this.alive = true;
 
 	this.kill = function () {
 		var cell = world.getCell(this.row, this.col);
 		cell.depositFood(3);
 		cell.removeAnt();
-		// remove from ants
+		this.alive = false;
 		this.step = function () {};
 	};
 
@@ -65,13 +66,22 @@ function Ant(id, color, brain, world) {
 		return world.getCell(this.row, this.col);
 	};
 
-	this.step = function () {
-		if (this.resting > 0) {
-			this.resting--;
-		} else {
-			brain[this.state](this);
-		}
+	this.rest = function () {
+		this.resting = 14;
+		this.step = function () {
+			if (--this.resting === 0) {
+				this.step = execute(this);
+			}
+		};
 	};
+
+	var execute = function (ant) {
+		return function () {
+			brain[ant.state](ant);
+		};
+	};
+
+	this.step = execute(this);
 
 	this.toString = function () {
 		return this.color + " ant of id " + this.id + ", dir " + 
@@ -188,7 +198,7 @@ function AntBrain(states, color, rng) {
 				if (cell.isAvailable()) {
 					cell.moveAntHere(ant);
 					ant.state = state.st1;
-					ant.resting = 14;
+					ant.rest();
 					ant.checkForAdjacentDeaths();
 				} else {
 					ant.state = state.st2;
@@ -432,17 +442,35 @@ function AntGame(redBrain, blackBrain, world) {
 	};
 
 	var getScore = function () {
-		var score = {red: 0, black: 0};
+		var score = {
+			red: {
+				food: 0,
+				deaths: 0
+			},
+			black: {
+				food: 0,
+				deaths: 0
+			}
+		};
+
 		for (var row = 0; row < world.height; row++) {
 			for (var col = 0; col < world.width; col++) {
 				var cell = world.getCell(row, col);
 				if (cell.type === "black hill") {
-					score.black += cell.getFood();
+					score.black.food += cell.getFood();
 				} else if (cell.type === "red hill") {
-					score.red += cell.getFood();
+					score.red.food += cell.getFood();
 				}
 			}
 		}
+
+		for (var i = ants.length - 1; i >= 0; i--) {
+			if (ants[i].alive === false) {
+				score[ants[i].color].deaths += 1;
+			}
+		}
+
+		return score;
 	};
 
 	return {
@@ -1140,6 +1168,8 @@ function RandomNumberGenerator() {
 		}
 	};
 }
+
+exports.RandomNumberGenerator = RandomNumberGenerator;
 exports.test_only = exports.test_only || {};
 
 // generates random worlds fit for contests

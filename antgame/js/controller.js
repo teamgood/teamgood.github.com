@@ -5,48 +5,69 @@ BRAINS.push({
 	name: "Chealsea",
 	preset: true,
 	source: 
-		"Flip 1 6 1" + "\n" +
-		"Flip 6 2 2" + "\n" +
-		"Flip 5 2 3" + "\n" +
-		"Flip 4 9 4" + "\n" +
-		"Flip 3 1 5" + "\n" +
-		"Flip 2 1 2" + "\n" +
-		"Flip 2 7 8" + "\n" +
+		"Sense Ahead 1 3 Food" + "\n" +
+		"Move 2 0" + "\n" +
+		"PickUp 8 0" + "\n" +
+		"Flip 3 4 5" + "\n" +
 		"Turn Left 0" + "\n" +
-		"Turn Right 0"
+		"Flip 2 6 7" + "\n" +
+		"Turn Right 0" + "\n" +
+		"Move 0 3" + "\n" +
+		"Sense Ahead 9 11 Home " + "\n" +
+		"Move 10 8" + "\n" +
+		"Drop 0" + "\n" +
+		"Flip 3 12 13" + "\n" +
+		"Turn Left 8" + "\n" +
+		"Flip 2 14 15" + "\n" +
+		"Turn Right 8" + "\n" +
+		"Move 8 11" + "\n" 
 });
 
 BRAINS.push({
-	name: "Bolton Wanderers from the north coast of the citadel",
+	name: "Bolton Wanderers",
 	preset: true,
 	source: 
-		"Flip 1 6 1" + "\n" +
-		"Flip 6 2 2" + "\n" +
-		"Flip 5 2 3" + "\n" +
-		"Flip 4 9 4" + "\n" +
-		"Flip 3 1 5" + "\n" +
-		"Flip 2 1 2" + "\n" +
-		"Flip 2 7 8" + "\n" +
-		"Flip 2 7 8" + "\n" +
+		"Sense Ahead 1 3 Food" + "\n" +
+		"Move 2 0" + "\n" +
+		"PickUp 8 0" + "\n" +
+		"Flip 3 4 5" + "\n" +
 		"Turn Left 0" + "\n" +
-		"Turn Right 0"
+		"Flip 2 6 7" + "\n" +
+		"Turn Right 0" + "\n" +
+		"Move 0 3" + "\n" +
+		"Sense Ahead 9 11 Home " + "\n" +
+		"Move 10 8" + "\n" +
+		"Drop 0" + "\n" +
+		"Flip 3 12 13" + "\n" +
+		"Turn Left 8" + "\n" +
+		"Flip 2 14 15" + "\n" +
+		"Turn Right 8" + "\n" +
+		"Move 8 11" + "\n" 
 });
 
 BRAINS.push({
 	name: "Civic Duty",
 	preset: true,
 	source: 
-		"Flip 1 6 1" + "\n" +
-		"Flip 6 2 2" + "\n" +
-		"Flip 5 2 3" + "\n" +
-		"Flip 4 9 4" + "\n" +
-		"Flip 3 1 5" + "\n" +
-		"Flip 2 1 2" + "\n" +
-		"Flip 2 7 8" + "\n" +
-		"Flip 2 7 8" + "\n" +
+		"Sense Ahead 1 3 Food" + "\n" +
+		"Move 2 0" + "\n" +
+		"PickUp 8 0" + "\n" +
+		"Flip 3 4 5" + "\n" +
 		"Turn Left 0" + "\n" +
-		"Turn Right 0"
-});var WORLDS = [];
+		"Flip 2 6 7" + "\n" +
+		"Turn Right 0" + "\n" +
+		"Move 0 3" + "\n" +
+		"Sense Ahead 9 11 Home " + "\n" +
+		"Move 10 8" + "\n" +
+		"Drop 0" + "\n" +
+		"Flip 3 12 13" + "\n" +
+		"Turn Left 8" + "\n" +
+		"Flip 2 14 15" + "\n" +
+		"Turn Right 8" + "\n" +
+		"Move 8 11" + "\n" 
+});
+
+var WORLDS = [];
 
 WORLDS.push({
 	name: "Big world",
@@ -305,6 +326,23 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 			on("vis_on", function () {
 				_match.vis = true;
 			});
+			on("go", function () {
+				RUN_SANS.go(
+					BRAINS[_match.red_id],
+					BRAINS[_match.black_id],
+					WORLDS[_match.world_id],
+					text("rounds"),
+					function (results) {
+						showResults(results);
+						on("results_close", function () {
+							go();
+						}, true);
+					},
+					function () {
+						go();
+					}
+				);
+			}, true);
 		}
 	};
 
@@ -339,6 +377,7 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 	var go = function (brains, worlds) {
 
 	};
+
 	function getFixtures(brains, worlds) {
 		var fixtures = [];
 		var numBrains = brains.length;
@@ -399,6 +438,7 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 		contest.brains = newBrains;
 		contest.worlds = newWorlds;
 		contest.fixtures = getFixtures(newBrains, newWorlds);
+		contest.played_fixtures = [];
 	}
 
 	function getRankedBrains(brains) {
@@ -408,7 +448,7 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 			ranked.push(brains[i]);
 		};
 		ranked.sort(function (a, b) {
-			return a.score - b.score;
+			return b.score - a.score;
 		});
 		return ranked;
 	}
@@ -418,28 +458,29 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 	}
 
 	function printFixtures() {
-		console.log("printFixtures", contest.fixtures);
 		var played = [];
 		var remaining = [];
-		var numFixtures = contest.fixtures.length;
-		for (var i = 0; i < numFixtures; i++) {
+		for (var i = contest.fixtures.length - 1; i >= 0; i--) {
 			var f = contest.fixtures[i];
-			if (f.outcome === -1) {
-				remaining.push({
-					id: i,
-					red_name: contest.brains[f.red].name,
-					black_name: contest.brains[f.black].name,
-					world_name: contest.worlds[f.world].name
-				});
-			} else {
-				played.push({
-					outcome: f.outcome,
-					red_name: contest.brains[f.red].name,
-					black_name: contest.brains[f.black].name,
-					world_name: contest.worlds[f.world].name
-				});
-			}
+			remaining.unshift({
+				id: i,
+				red_name: contest.brains[f.red].name,
+				black_name: contest.brains[f.black].name,
+				world_name: contest.worlds[f.world].name
+			});
 		}
+
+		for (var i = contest.played_fixtures.length - 1; i >= 0; i--) {
+			var f = contest.played_fixtures[i];
+			played.push({
+				outcome: f.outcome,
+				red_name: contest.brains[f.red].name,
+				black_name: contest.brains[f.black].name,
+				world_name: contest.worlds[f.world].name
+			});
+		};
+
+		
 		view.contest.populateRemainingFixtures(remaining);
 		view.contest.populatePlayedFixtures(played);
 		if (remaining.length === 0) {
@@ -450,15 +491,66 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 	}
 
 	var go = function (brains, worlds) {
-		setup(brains, worlds);
+		if (brains && worlds) {
+			setup(brains, worlds);
+		}
 		printRankings();
 		printFixtures();
 		view.menu.goto("contest");
 	};
 
+	function handleResults(results, fixtureId) {
+		var f = contest.fixtures[fixtureId];
+		if (results.red.food > results.black.food) {
+			contest.brains[f.red].score += 2;
+			f.outcome = 0;
+		} else if (results.black.food > results.red.food) {
+			contest.brains[f.black].score += 2;
+			f.outcome = 2;
+		} else {
+			contest.brains[f.red].score += 1;
+			contest.brains[f.black].score += 1;
+			f.outcome = 1;
+		}
+		contest.brains[f.red].played += 1;
+		contest.brains[f.black].played += 1;
+		contest.worlds[f.world].red_food += results.red.food;
+		contest.worlds[f.world].black_food += results.black.food;
+		contest.fixtures.splice(fixtureId, 1);
+		contest.played_fixtures.push(f);
+	}
+
+	function run_sans(id, onFinish) {
+		var f = contest.fixtures[id];
+		RUN_SANS.go(
+			contest.brains[f.red],
+			contest.brains[f.black],
+			contest.worlds[f.world],
+			30000,
+			onFinish,
+			function () { go(); } 
+		);
+	}
+
 	var init = function () {
 		view.contest.on("play_all", function () {
+			(function playAll(){
+				if (contest.fixtures.length > 0) {
+					run_sans(0, function (results) {
+						handleResults(results, 0);
+						playAll();
+					});	
+				} else {
+					go();
+				}
+			})();
+		});
 
+		view.contest.on("play", function (id) {
+			run_sans(id, function (results) {
+				handleResults(results, id);
+				go();
+			});
 		});
 
 		view.contest.on("played_fixtures", function () {
@@ -554,7 +646,74 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 	};
 
 })();
-	var MENU = {
+	var RUN_SANS = (function () {
+
+	var go = function (red, black, world, rounds, onFinish, onCancel) {
+		var rng = model.RandomNumberGenerator();
+		var redBrain = model.AntBrain(
+			model.parseAntBrain(red.source), 
+			"red",
+			rng
+		);
+		var blackBrain = model.AntBrain(
+			model.parseAntBrain(black.source),
+			"black",
+			rng
+		);
+		var antworld = model.AntWorld(model.parseAntWorld(world.source));
+		var game = model.AntGame(redBrain, blackBrain, antworld);
+
+		view.run_sans.text("red_name", red.name);
+		view.run_sans.text("black_name", black.name);
+		view.run_sans.text("world_name", world.name);
+
+		view.run_sans.on("cancel", function () {
+			tearDown();
+			onCancel();
+		}, true);
+		
+		view.menu.goto("run_sans");
+		view.menu.hideBreadcrumbs();
+		run(game, rounds, onFinish);
+	};
+
+	var timeout;
+	var interval;
+
+	function run(game, rounds, onFinish) {
+		var i = 0;
+		interval = setInterval(updateProgressBar, 200);
+		function updateProgressBar() {
+			view.run_sans.text(
+				"progress",
+				Math.floor(100 / rounds * i) + "%"
+			);
+		}
+		function doSomeRounds() {
+			var numToRun = Math.min(1000, rounds - i);
+			if (numToRun > 0) {
+				game.run(numToRun);
+				i += numToRun;
+				timeout = setTimeout(doSomeRounds, 0);
+			} else {
+				tearDown();
+				onFinish(game.getScore());
+			}
+		}
+		doSomeRounds();
+	}
+
+	function tearDown() {
+		clearTimeout(timeout);
+		clearInterval(interval);
+		view.menu.showBreadcrumbs();
+		view.run_sans.text("progress", "0%");
+	}
+
+	return {
+		go: go
+	};
+})();var MENU = {
 	go: function () { view.menu.goto("root"); },
 
 	init: function () {
@@ -571,8 +730,6 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 	var refresh = function () {
 		if (_excludes.length === resources.length) {
 			view[list].sayEmpty();
-			console.log("_excludes", _excludes);
-			console.log("resources", resources);
 			return;
 		}
 		view[list].clear();
@@ -627,7 +784,6 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 	};
 
 	var showId = function (id) {
-		console.log("trying to reshow id",id);
 		if (id === "all") {
 			_excludes = [];
 			refresh();

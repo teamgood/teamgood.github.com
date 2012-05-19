@@ -32,6 +32,7 @@ function LogicalGroup(events, textElems) {
 	this.trigger = function (evnt, argsArray) {
 		if (Array.isArray(this.callbacks[evnt])) {
 			// iterate over callbacks and call them!
+
 			for (var i = this.callbacks[evnt].length - 1; i >= 0; i--) {
 				this.callbacks[evnt][i].apply(this, argsArray);
 			};
@@ -347,7 +348,6 @@ exports.contest.populateRemainingFixtures = function (fixtures) {
 		return;
 	}
 
-	console.log("fixtures", fixtures);
 	for (var i = 0; i < numFixtures; i++) {
 		var row = $("<tr></tr>").appendTo(t);
 		$("<td>" + fixtures[i].red_name + "</td>").appendTo(row);
@@ -402,11 +402,11 @@ exports.contest.populatePlayedFixtures = function (fixtures) {
 		return;
 	}
 
-	console.log("fixtures", fixtures);
 	for (var i = 0; i < numFixtures; i++) {
 		var f = fixtures[i];
 		var row = $("<tr></tr>").appendTo(t);
 		var red_name = getColoredName("red", f.red_name, f.outcome);
+		var black_name = getColoredName("black", f.black_name, f.outcome);
 		$("<td>" + red_name + "</td>").appendTo(row);
 		$("<td>" + black_name + "</td>").appendTo(row);
 		$("<td>" + f.world_name + "</td>").appendTo(row);
@@ -562,7 +562,7 @@ var events = [
 		binder: function (callback) {
 			$(".ag-btn-contest").click(callback);
 		}
-	},
+	}
 ];
 
 exports.menu = new LogicalGroup(events, {});
@@ -577,6 +577,11 @@ var locations = {
 		prerequisites: ["root"],
 		description: "Single Match",
 		selector: ".ag-sm"
+	},
+	run_sans: {
+		prerequisites: [],
+		description: "Run Without Graphics",
+		selector: ".ag-run-sans"
 	},
 	contest_setup: {
 		prerequisites: ["root"],
@@ -631,6 +636,14 @@ exports.menu.goto = function (location) {
 	}
 };
 
+exports.menu.hideBreadcrumbs = function () {
+	$("#ag-bread").hide();
+};
+
+exports.menu.showBreadcrumbs = function () {
+	$("#ag-bread").show();
+};
+
 
 })();var LogicalGroup = LogicalGroup || function () {};
 
@@ -666,7 +679,7 @@ var events = [
 	{
 		name: "go",
 		binder: function (callback) {
-			$("#ag-sm-go").click(callback);
+			$("#ag-sm-run").click(callback);
 		}
 	},
 	{
@@ -688,29 +701,69 @@ var events = [
 				callback("on");
 			});
 		}
+	},
+	{
+		name: "results_close",
+		binder: function (callback) {
+			$("#ag-sm-results").on("hide", callback);
+		}
 	}
 ];
 
 var textElems = {
 	red_name: {
 		get: function () { return $("#ag-sm-red-name").text(); },
-		set: function (text) { $("#ag-sm-red-name").text(text); }
+		set: function (text) {
+			$("#ag-sm-red-name").text(text); 
+			$("#ag-sm-results-red-name").text(text); 
+		}
 	},
 	black_name: {
 		get: function () { return $("#ag-sm-black-name").text(); },
-		set: function (text) { $("#ag-sm-black-name").text(text); }
+		set: function (text) {
+			$("#ag-sm-black-name").text(text);
+			$("#ag-sm-results-black-name").text(text);
+		}
 	},
 	world_name: {
 		get: function () { return $("#ag-sm-world-name").text(); },
-		set: function (text) { $("#ag-sm-world-name").text(text); }
+		set: function (text) { 
+			$("#ag-sm-world-name").text(text); 
+		}
 	},
 	rounds: {
 		get: function () { return $("#ag-sm-rounds").attr("value"); },
 		set: function (text) { $("#ag-sm-rounds").attr("value", text); }
+	},
+	results_red_food: {
+		get: function () {},
+		set: function (text) { $("#ag-sm-results-red-food").text(text); }
+	},
+	results_black_food: {
+		get: function () {},
+		set: function (text) { $("#ag-sm-results-black-food").text(text); }
+	},
+	results_red_deaths: {
+		get: function () {},
+		set: function (text) { $("#ag-sm-results-red-deaths").text(text); }
+	},
+	results_black_deaths: {
+		get: function () {},
+		set: function (text) { $("#ag-sm-results-black-deaths").text(text); }
 	}
+
 };
 
 exports.single_match = new LogicalGroup(events, textElems);
+
+exports.single_match.showResults = function (results) {
+	console.log(results);
+	this.text("results_red_food", "" + results.red.food);
+	this.text("results_black_food", "" + results.black.food);
+	this.text("results_red_deaths", "" + results.red.deaths);
+	this.text("results_black_deaths", "" + results.black.deaths);
+	$("#ag-sm-results").modal("show");
+};
 
 })();
 (function () {
@@ -771,16 +824,50 @@ exports.getWorldThumbnail = function (grid) {
 };
 
 })();
-exports.init = function () {
+(function () {
+
+var events = [
+	{
+		name: "cancel",
+		binder: function (callback) {
+			$("#ag-run-sans-cancel").click(callback);
+		}
+	}
+];
+
+var textElems = {
+	red_name: {
+		get: function () { return $("#ag-run-sans-red").text(); },
+		set: function (text) { $("#ag-run-sans-red").text(text); }
+	},
+	black_name: {
+		get: function () { return $("#ag-run-sans-black").text(); },
+		set: function (text) { $("#ag-run-sans-black").text(text); }
+	},
+	world_name: {
+		get: function () { return $("#ag-run-sans-world").text(); },
+		set: function (text) { $("#ag-run-sans-world").text(text); }
+	},
+	progress: {
+		get: function () {},
+		set: function (percent) {
+			$("#ag-run-sans-progress").css("width", percent);
+		}
+	}
+};
+
+exports.run_sans = new LogicalGroup(events, textElems);
+
+})();exports.init = function () {
 	this.menu.init();
 	this.single_match.init();
 	this.brain_list.init();
 	this.world_list.init();
 	this.edit.init();
-	this.single_match.init();
 	this.contest.init();
 	this.contest.brains.init();
 	this.contest.worlds.init();
+	this.run_sans.init();
 	$("#loading-bg").hide();
 };
 return exports;
