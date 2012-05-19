@@ -139,6 +139,10 @@ function getItemList (events, textElems, baseElem) {
 		$(".ag-" + baseElem + "-item[id='" + id + "']").remove();
 	};
 
+	list.sayEmpty = function (id) {
+		$("#ag-" + baseElem + "-list").html('<li class="nav-header">empty</li>');
+	};
+
 	return list;
 }
 
@@ -230,6 +234,260 @@ exports.world_list.thumb = function (canvas) {
 
 
 
+(function () {
+
+var events = [
+	{
+		name: "go",
+		binder: function (callback) {
+			$("#ag-c-go").click(callback);
+		}
+	},
+	{
+		name: "play_all",
+		binder: function (callback) {
+			$("#ag-c-play-all").click(callback);
+		}
+	},
+	{
+		name: "play",
+		binder: function () {} // bound dynamically
+	},
+	{
+		name: "vis_off",
+		binder: function (callback) {
+			$(".ag-vis-on").click(function () {
+				callback("off");
+			});
+		}
+	},
+	{
+		name: "vis_on",
+		binder: function (callback) {
+			$(".ag-vis-off").click(function () {
+				callback("on");
+			});
+		}
+	},
+	{
+		name: "played_fixtures",
+		binder: function (callback) {
+			$("#ag-c-fix-played-link").click(callback);
+		}
+	},
+	{
+		name: "remaining_fixtures",
+		binder: function (callback) {
+			$("#ag-c-fix-rem-link").click(callback);
+		}
+	}
+];
+
+var textElems = {
+	fixtures_played: {
+		get: function () { $("#ag-c-fix-played-text").text(); },
+		set: function (text) { $("#ag-c-fix-played-text").text(text); }
+	},
+	fixtures_remaining: {
+		get: function () { $("#ag-c-fix-rem-text").text(); },
+		set: function (text) { $("#ag-c-fix-rem-text").text(text); }
+	}
+
+};
+
+exports.contest = new LogicalGroup(events, textElems);
+
+exports.contest.showRemainingFixtures = function () {
+	showHideFixtures("rem", "played");
+	$("#ag-c-play-all").show();
+};
+
+exports.contest.showPlayedFixtures = function () {
+	showHideFixtures("played", "rem");
+	$("#ag-c-play-all").hide();
+};
+
+function showHideFixtures(toShow, toHide) {
+	$("#ag-c-fix-" + toHide + "-link").parent().removeClass("active");
+	$("#ag-c-fix-" + toHide).hide();
+	$("#ag-c-fix-" + toShow + "-link").parent().addClass("active");
+	$("#ag-c-fix-" + toShow).show();
+}
+
+exports.contest.populateRankings = function (rankedBrains) {
+	var t = $("#ag-c-rankings");
+	t.html("");
+	t.append('<thead><tr><th>Rank</th><th>Brain</th><th>Played</th><th>Score</th></tr></thead>');
+
+	var rank = 1;
+	var numBrains = rankedBrains.length;
+	for (var i = 0; i < numBrains; i++) {
+		var row = "";
+		row += "<tr>";
+		row += "<td>" + rank + "</td>";
+		row += "<td>" + rankedBrains[i].name + "</td>";
+		row += "<td>" + rankedBrains[i].fixtures + "</td>";
+		row += "<td>" + rankedBrains[i].score + "</td>";
+		row += "</tr>";
+		t.append(row);
+		if (i < numBrains - 1 && rankedBrains[i].score !== rankedBrains[i + 1].score) {
+			rank++;
+		}
+	}
+};
+
+exports.contest.populateRemainingFixtures = function (fixtures) {
+	var numFixtures = fixtures.length;
+	this.text("fixtures_remaining", numFixtures + "");
+	var t = $("#ag-c-fix-rem");
+	t.html("");
+	t.append('<thead><tr><th>Red Brain</th><th>Black Brain</th><th>World</th></tr></thead>');
+	if (numFixtures === 0) {
+		t.append("<tr><td colspan='3'><span style='font-style: italic'>none</span></td></tr>")
+		return;
+	}
+
+	console.log("fixtures", fixtures);
+	for (var i = 0; i < numFixtures; i++) {
+		var row = $("<tr></tr>").appendTo(t);
+		$("<td>" + fixtures[i].red_name + "</td>").appendTo(row);
+		$("<td>" + fixtures[i].black_name + "</td>").appendTo(row);
+		$("<td>" + fixtures[i].world_name + "</td>").appendTo(row);
+		var finalCell = $("<td style='border-left: none;'></td>").appendTo(row);
+		var play_btn = $('<a class="btn btn-mini btn-primary pull-right"' + 
+		                 'style="position:absolute; margin-left: -35px;">play &raquo;</a>').appendTo(finalCell).hide();
+
+		with ({id: fixtures[i].id, that: this, pb: play_btn}) {
+			play_btn.click(function () {
+				that.trigger("play", [id]);
+			});
+			row.hover(function () { pb.show(); }, function () { pb.hide(); });
+		}
+
+	}
+};
+
+var colors = {
+	win: "#A22",
+	lose: "#000",
+	draw: "#22A"
+};
+
+var team_colors = {
+	red: {
+		"0": colors["win"],
+		"1": colors["draw"],
+		"2": colors["lose"]
+	},
+	black: {
+		"2": colors["win"],
+		"1": colors["draw"],
+		"0": colors["lose"]
+	}
+};
+
+function getColoredName(color, name, outcome) {
+	color = team_colors[color][outcome];
+	return '<span style="color: ' + color + '">' + name + '</span>';
+}
+
+exports.contest.populatePlayedFixtures = function (fixtures) {
+	var numFixtures = fixtures.length;
+	this.text("fixtures_played", numFixtures + "");
+	var t = $("#ag-c-fix-played");
+	t.html("");
+	t.append('<thead><tr><th>Red Brain</th><th>Black Brain</th><th>World</th></tr></thead>');
+	if (numFixtures === 0) {
+		t.append("<tr><td colspan='3'><span style='font-style: italic'>none</span></td></tr>")
+		return;
+	}
+
+	console.log("fixtures", fixtures);
+	for (var i = 0; i < numFixtures; i++) {
+		var f = fixtures[i];
+		var row = $("<tr></tr>").appendTo(t);
+		var red_name = getColoredName("red", f.red_name, f.outcome);
+		$("<td>" + red_name + "</td>").appendTo(row);
+		$("<td>" + black_name + "</td>").appendTo(row);
+		$("<td>" + f.world_name + "</td>").appendTo(row);
+	}
+};
+
+})();(function () {
+
+function getContestList (baseElem) {
+	var list = new LogicalGroup([
+		{
+			name: "add",
+			binder: function (callback) {
+				$("#ag-c-add-" + baseElem).click(callback);
+			}
+		},
+		{
+			name: "dismiss",
+			binder: function () {}
+		},
+	], {});
+	list.add = function (name, id) {
+		// compile individual html elements
+		var list_item = item_name = dismiss_btn = "";
+		list_item  += "<tr class='ag-c-" + baseElem + "-item' id='" + id + "'>";
+		
+		item_name += "<td>";
+		item_name +=   name;
+		
+		dismiss_btn += "<a class='btn btn-mini btn-warning pull-right rightmost' href='#'>";
+		dismiss_btn +=   "dismiss &raquo;";
+		dismiss_btn += "</a>";
+
+		item_name +=   "</td>";
+
+		list_item  += "</tr>";
+
+		// attach the html elements to the DOM and set up events & callbacks
+
+		var tr = $(list_item).prependTo("#ag-c-" + baseElem + "-list");
+		var td = $(item_name).appendTo(tr);
+
+		var dismiss = $(dismiss_btn).appendTo(td).hide();
+
+		var that = this;
+
+		dismiss.click(function (event) { 
+			event.stopPropagation();
+			that.trigger("dismiss", [id]); 
+		});
+
+		tr.hover(
+			function (event) {
+				dismiss.show();
+			},
+			function (obj) {
+				dismiss.hide();
+			}
+		);
+	};
+
+	list.clear = function () {
+		$("#ag-c-" + baseElem + "-list").html("");
+	};
+
+	list.remove = function (id) {
+		$(".ag-c-" + baseElem + "-item[id='" + id + "']").remove();
+	};
+
+	list.sayEmpty = function (id) {
+		$("#ag-c-" + baseElem + "-list").html('<tr><td><span style="font-style: italic">none selected</span></td></tr>');
+	};
+
+	return list;
+}
+
+exports.contest.worlds = getContestList("worlds");
+exports.contest.brains = getContestList("brains");
+
+
+})();
 var LogicalGroup = LogicalGroup || function () {};
 
 (function () {
@@ -320,6 +578,16 @@ var locations = {
 		description: "Single Match",
 		selector: ".ag-sm"
 	},
+	contest_setup: {
+		prerequisites: ["root"],
+		description: "Contest Setup",
+		selector: ".ag-c"
+	},
+	contest: {
+		prerequisites: ["root"],
+		description: "Contest",
+		selector: ".ag-cstats"
+	},
 	sm_pick_brain: {
 		prerequisites: ["root","single_match"],
 		description: "Pick Brain",
@@ -328,6 +596,16 @@ var locations = {
 	sm_pick_world: {
 		prerequisites: ["root","single_match"],
 		description: "Pick World",
+		selector: ".ag-wl"
+	},
+	c_pick_brain: {
+		prerequisites: ["root","contest_setup"],
+		description: "Pick Brains",
+		selector: ".ag-bl"
+	},
+	c_pick_world: {
+		prerequisites: ["root","contest_setup"],
+		description: "Pick Worlds",
 		selector: ".ag-wl"
 	}
 };
@@ -394,9 +672,9 @@ var events = [
 	{
 		name: "vis_off",
 		binder: function (callback) {
-			$("#ag-sm-vis-on").click(function () {
-				$("#ag-sm-vis-on").hide();
-				$("#ag-sm-vis-off").show();
+			$(".ag-vis-on").click(function () {
+				$(".ag-vis-on").hide();
+				$(".ag-vis-off").show();
 				callback("off");
 			});
 		}
@@ -404,9 +682,9 @@ var events = [
 	{
 		name: "vis_on",
 		binder: function (callback) {
-			$("#ag-sm-vis-off").click(function () {
-				$("#ag-sm-vis-off").hide();
-				$("#ag-sm-vis-on").show();
+			$(".ag-vis-off").click(function () {
+				$(".ag-vis-off").hide();
+				$(".ag-vis-on").show();
 				callback("on");
 			});
 		}
@@ -500,6 +778,9 @@ exports.init = function () {
 	this.world_list.init();
 	this.edit.init();
 	this.single_match.init();
+	this.contest.init();
+	this.contest.brains.init();
+	this.contest.worlds.init();
 	$("#loading-bg").hide();
 };
 return exports;

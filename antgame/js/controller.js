@@ -275,8 +275,7 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 
 	function _getPickCallback(color) {
 		return function () {
-			view.menu.goto("sm_pick_brain");
-			BRAIN_LIST.refresh();
+			BRAIN_LIST.go("sm");
 			view.brain_list.trigger("select", [_match[color + "_id"]]);
 			view.brain_list.on("pick", function (id) { 
 				_match[color + "_id"] = id;
@@ -297,7 +296,7 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 				view.world_list.on("pick", function (id) {
 					_match.world_id = id;
 					go();
-				});
+				}, true);
 			});
 			on("rounds_change", _validateRounds);
 			on("vis_off", function () {
@@ -336,13 +335,232 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 	};
 
 })();
+	var CONTEST = (function () {
+	var go = function (brains, worlds) {
+
+	};
+	function getFixtures(brains, worlds) {
+		var fixtures = [];
+		var numBrains = brains.length;
+		var numWorlds = worlds.length;
+		for (var i = 0; i < numBrains; i++) {
+			for (var j = i + 1; j < numBrains; j++) {
+				for (var k = 0; k < numWorlds; k++) {
+					fixtures.push({
+						red: i,
+						black: j,
+						world: k,
+						outcome: -1
+					});
+					fixtures.push({
+						red: j,
+						black: i,
+						world: k,
+						outcome: -1
+					});
+				}
+			}
+		}
+		// them's a lot of fixtures!
+		// let's mix them up a bit before we return them
+		fixtures.sort(function () { return Math.random() - 0.5; });
+		return fixtures; 
+	}
+
+	var contest = {};
+
+	function setup(brains, worlds) {
+		// we've just got a list of ids. Let's copy the objects 
+		// over so if they get deleted elsewhere, we still have them.
+		var newBrains = [];
+		for (var i = brains.length - 1; i >= 0; i--) {
+			var brain = BRAINS[brains[i]];
+			newBrains.push({
+				name: brain.name,
+				source: brain.source,
+				score: 0,
+				fixtures: 0
+			});
+		};
+
+		var newWorlds = [];
+		for (var i = worlds.length - 1; i >= 0; i--) {
+			var world = WORLDS[worlds[i]];
+			newWorlds.push({
+				name: world.name,
+				source: world.source,
+				red_food: 0,
+				black_food: 0
+			});
+		};
+
+		contest = {};
+
+		contest.brains = newBrains;
+		contest.worlds = newWorlds;
+		contest.fixtures = getFixtures(newBrains, newWorlds);
+	}
+
+	function getRankedBrains(brains) {
+		// first duplicate the array so we don't lose ids
+		var ranked = [];
+		for (var i = brains.length - 1; i >= 0; i--) {
+			ranked.push(brains[i]);
+		};
+		ranked.sort(function (a, b) {
+			return a.score - b.score;
+		});
+		return ranked;
+	}
+
+	function printRankings() {
+		view.contest.populateRankings(getRankedBrains(contest.brains));
+	}
+
+	function printFixtures() {
+		console.log("printFixtures", contest.fixtures);
+		var played = [];
+		var remaining = [];
+		var numFixtures = contest.fixtures.length;
+		for (var i = 0; i < numFixtures; i++) {
+			var f = contest.fixtures[i];
+			if (f.outcome === -1) {
+				remaining.push({
+					id: i,
+					red_name: contest.brains[f.red].name,
+					black_name: contest.brains[f.black].name,
+					world_name: contest.worlds[f.world].name
+				});
+			} else {
+				played.push({
+					outcome: f.outcome,
+					red_name: contest.brains[f.red].name,
+					black_name: contest.brains[f.black].name,
+					world_name: contest.worlds[f.world].name
+				});
+			}
+		}
+		view.contest.populateRemainingFixtures(remaining);
+		view.contest.populatePlayedFixtures(played);
+		if (remaining.length === 0) {
+			view.contest.showPlayedFixtures();
+		} else {
+			view.contest.showRemainingFixtures();
+		}
+	}
+
+	var go = function (brains, worlds) {
+		setup(brains, worlds);
+		printRankings();
+		printFixtures();
+		view.menu.goto("contest");
+	};
+
+	var init = function () {
+		view.contest.on("play_all", function () {
+
+		});
+
+		view.contest.on("played_fixtures", function () {
+			view.contest.showPlayedFixtures();
+		});
+
+		view.contest.on("remaining_fixtures", function () {
+			view.contest.showRemainingFixtures();
+		});
+	};
+
+	return {
+		go: go,
+		init: init
+	}
+})();var CONTEST_SETUP = (function () {
+
+	// this holds the metadata for the contest to be run
+	var _contest = {
+		brains: [],
+		worlds: [],
+		game: null,
+		vis: true
+	};
+
+	var go = function () {
+		view.menu.goto("contest_setup");
+		_refreshList("brains");
+		_refreshList("worlds");
+	};
+
+	function _refreshList(component) {
+		if (_contest[component].length === 0) {
+			view.contest[component].sayEmpty();
+			return;
+		}
+
+		var resources = component === "brains" ? BRAINS : WORLDS;
+		var v = view.contest[component];
+		v.clear();
+		for (var i = _contest[component].length - 1; i >= 0; i--) {
+			var id = _contest[component][i];
+			v.add(resources[id].name, id);
+		};
+	}
+
+	var init = function () {
+		// hook up things
+
+		function initList(component) {
+			var clist, vlist;
+			if (component === "brains") {
+				clist = BRAIN_LIST;
+				vlist = view.brain_list;
+			} else {
+				clist = WORLD_LIST;
+				vlist = view.world_list
+			}
+			view.contest[component].on("add", function () {
+				clist.go("c", true);
+				for (var i = _contest[component].length - 1; i >= 0; i--) {
+					clist.dontShowId(_contest[component][i]);
+				}
+				clist.refresh();
+				vlist.on("pick", function (id) {
+					if (_contest[component].indexOf(id) === -1) {
+						_contest[component].push(id);
+						clist.dontShowId(id, true, function () { go(); });
+					}
+				}, true);
+			});
+
+			view.contest[component].on("dismiss", function (id) {
+				var i = _contest[component].indexOf(id);
+				if (i > -1) {
+					_contest[component].splice(i, 1);
+					_refreshList(component);
+				}
+			});
+		}
+
+		initList("brains");
+		initList("worlds");
+
+		view.contest.on("go", function () {
+			CONTEST.go(_contest.brains, _contest.worlds);
+		});
+	};
+
+	return {
+		go: go,
+		init: init
+	};
+
+})();
 	var MENU = {
 	go: function () { view.menu.goto("root"); },
 
 	init: function () {
 		view.menu.on("goto_root", this.go);
 		view.menu.on("goto_single_match", MATCH.go);
-		//view.menu.on("goto_contest", CONTEST.go);
+		view.menu.on("goto_contest", CONTEST_SETUP.go);
 		this.go();
 	}
 };function getListHandler(list, resources, initCallback) {
@@ -351,6 +569,12 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 	var _excludes = [];
 
 	var refresh = function () {
+		if (_excludes.length === resources.length) {
+			view[list].sayEmpty();
+			console.log("_excludes", _excludes);
+			console.log("resources", resources);
+			return;
+		}
 		view[list].clear();
 		for (var i = 0, len = resources.length; i < len; i++) {
 			if (_excludes.indexOf(i) === -1) {
@@ -363,8 +587,8 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 	var add = function (obj) {
 		resources.push(obj);
 		var i = resources.length - 1;
-		view[list].add(resources[i].name, i , resources[i].preset);
-		view[list].trigger("select", [i]);
+		_highlighted = resources.length - 1;
+		refresh();
 	};
 
 	// return new highlighted
@@ -379,14 +603,31 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 		if (typeof callback === "function") { callback(_highlighted); }
 	};
 
-	var dontShowId = function (id, reload) {
+
+	var dontShowId = function (id, reload, onEmpty) {
 		if (_excludes.indexOf(id) === -1) {
 			_excludes.push(id);
+			if (_excludes.length === resources.length &&
+				typeof onEmpty === "function") {
+				onEmpty();
+			} else if (id === _highlighted) {
+				do { 
+					_highlighted--; 
+				} while (_highlighted >= 0 && _excludes.indexOf(_highlighted) !== -1);
+				if (_highlighted === -1) {
+					_highlighted = id;
+					do {
+						_highlighted++
+					} while (_highlighted < resources.length && _excludes.indexOf(_highlighted) !== -1)
+				}
+				view[list].trigger("select", [_highlighted]);
+			}
 			if (reload) { refresh(); }
 		}
 	};
 
 	var showId = function (id) {
+		console.log("trying to reshow id",id);
 		if (id === "all") {
 			_excludes = [];
 			refresh();
@@ -434,7 +675,8 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 	var init = function () {
 		var that = this;
 		view.brain_list.on("select", function (id) {
-			view.brain_list.text("source", BRAINS[id].source);
+			var text = !!BRAINS[id] ? BRAINS[id].source : "";
+			view.brain_list.text("source", text);
 		});
 
 		
@@ -475,6 +717,7 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 
 	handler.go = function (from) {
 		view.menu.goto(from + "_pick_brain");
+		this.showId("all");
 	};
 
 	return handler;
@@ -511,7 +754,7 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 		var that = this;
 
 		view.world_list.on("select", function (id) {
-			view.world_list.thumb(WORLDS[id].thumb);
+			WORLDS[id] && view.world_list.thumb(WORLDS[id].thumb);
 		});
 
 		view.world_list.on("add", function () {
@@ -561,10 +804,11 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 	handler.go = function (from) {
 		contest = from === "c";
 		view.menu.goto(from + "_pick_world");
+		this.showId("all");
 
 		if (contest) {
 			for (var i = WORLDS.length - 1; i >= 0; i--) {
-				if (WORLDS[i].contest = false) {
+				if (WORLDS[i].contest === false) {
 					this.dontShowId(i);
 				}
 			}
@@ -583,6 +827,8 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 	MENU.init();
 	EDIT.init();
 	WORLD_LIST.init();
+	CONTEST.init();
+	CONTEST_SETUP.init();
 
 });
 

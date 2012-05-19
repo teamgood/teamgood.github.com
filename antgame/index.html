@@ -29,9 +29,14 @@
 		<div class="navbar-inner">
 			<div class="container">
 				<span class="brand">AntGame</span>
-				<ul class="nav ag-menu ag-singleMatch ag-Contest">
+				<ul class="nav ag-root ag-sm ag-wl ag-bl ag-c">
 					<li><a href="./tutorial.html">How to Play</a></li>
 				</ul>
+				<div class="pull-right ag-cstats">
+					<a class="btn btn-warning ag-vis-on" href="#">Graphics On</a>
+					<a class="btn btn-danger ag-vis-off" href="#" style="display: none;">Graphics Off</a>
+					
+				</div>
 			</div>
 		</div>
 	</div>
@@ -133,8 +138,8 @@
 							Run for&nbsp;&nbsp;
 							<input type="text" class="input-mini" value="300000" id="ag-sm-rounds" maxlength="6"/>
 							&nbsp;&nbsp;rounds&nbsp;&nbsp;
-							<a class="btn btn-warning" id="ag-sm-vis-on" href="#">with</a>
-							<a class="btn btn-danger" id="ag-sm-vis-off" href="#" style="display: none;">without</a>
+							<a class="btn btn-warning ag-vis-on" href="#">with</a>
+							<a class="btn btn-danger ag-vis-off" href="#" style="display: none;">without</a>
 							&nbsp;&nbsp;graphics
 						</form>
 					</div>
@@ -147,7 +152,7 @@
 	</div>
 	<!-- END SINGLE MATCH MENU DEF -->
 
-	<!-- SINGLE MATCH PICK BRAIN DEF -->
+	<!-- BRAIN LIST DEF -->
 	<div class="ag-bl container">
 		<div class="row">
 			<div class="span12 welcome">
@@ -191,9 +196,9 @@
 			</div>
 		</div>
 	</div>
-	<!-- END SINGLE MATCH PICK BRAIN DEF -->
+	<!-- END BRAIN LIST DEF -->
 
-	<!-- SINGLE MATCH PICK WORLD DEF -->
+	<!-- WORLD LIST DEF -->
 	<div class="ag-wl container">
 		<div class="row">
 			<div class="span12 welcome">
@@ -240,7 +245,124 @@
 			</div>
 		</div>
 	</div>
-	<!-- END SINGLE MATCH PICK WORLD DEF -->
+	<!-- END WORLD LIST DEF -->
+
+
+	<!--  CONTEST SETUP DEF -->
+	<div class="ag-c container">
+		<div class="row">
+			<div class="span12 welcome">
+				<div class="row" style="padding-bottom: 10px;">
+					<div class="span6">
+						<div class="leftmost">
+							<h3 class="pull-left">
+								Brains
+							</h3>
+							<a class="btn btn-primary pull-right " id="ag-c-add-brains">
+								Select 
+								<i class="icon-list-alt icon-white"></i>
+							</a>
+						</div>
+					</div>
+
+					<div class="span6">
+						<div class="rightmost">
+							<h3 class="pull-left">
+								Worlds
+							</h3>
+							<a class="btn btn-primary pull-right " id="ag-c-add-worlds">
+								Select 
+								<i class="icon-list-alt icon-white"></i>
+							</a>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="span6">
+						<div class="leftmost ">
+							<table class="table table-striped table-bordered" id="ag-c-brains-list">
+					
+							</table>
+						</div>
+					</div>
+
+					<div class="span6">
+						<div class="rightmost ">
+							<table class="table table-striped table-bordered" id="ag-c-worlds-list">
+					
+							</table>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="span12">
+						<div style="padding: 10px;">
+							<a class="btn btn-success pull-right " id="ag-c-go">
+								Go &raquo;
+							</a>
+							<div style="clear: both;"></div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- END CONTEST SETUP DEF -->
+
+	<!--  CONTEST DEF -->
+	<div class="ag-cstats container">
+		<div class="row">
+			<div class="span12 welcome">
+				<div class="row">
+					<div class="span6">
+						<h3 class="leftmost">
+							Fixtures
+						</h3>
+					</div>
+					<div class="span6">
+						
+						<h3>
+							Rankings
+						</h3>
+					</div>
+				</div>
+				<div class="row" style="padding-bottom: 10px;">
+					<div class="span6">
+						<div class="leftmost">
+							<a class="btn btn-success pull-right" style="margin-bottom: -30px;" href="#" id="ag-c-play-all">Play All &raquo;</a>
+							<ul class="nav nav-tabs">
+								<li>
+									<a href="#" id="ag-c-fix-rem-link">
+										Remaining (<span id="ag-c-fix-rem-text"></span>)
+									</a>
+								</li>
+								<li>
+									<a href="#" id="ag-c-fix-played-link">
+										Played (<span id="ag-c-fix-played-text"></span>)
+									</a>
+								</li>
+							</ul>
+							<table class="table table-striped table-bordered table-condensed" id="ag-c-fix-played">
+							</table>
+							<table class="table table-striped table-bordered table-condensed" id="ag-c-fix-rem">
+							</table>
+							
+						</div>
+					</div>
+					<div class="span6">
+						<div class="rightmost">
+							
+							<table class="table table-striped table-bordered table-condensed" id="ag-c-rankings">
+					
+							</table>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</div>
+	</div>
+	<!-- END CONTEST DEF -->
 
 	<div class="modal" id="ag-edit" style="display: none;">
 		<div class="modal-header">
@@ -281,11 +403,25 @@
 				Main Menu
 			</li>
 			<li class="ag-sm-bc">
-				<a href="#" class="ag-btn-sm">Single Match</a>
+				<a href="#" class="ag-btn-sm">Single Match Setup</a>
 				<span class="divider">/</span>
 			</li>
 			<li class="active ag-sm">
-				Single Match
+				Single Match Setup
+			</li>
+			<li class="ag-c-bc">
+				<a href="#" class="ag-btn-contest">Contest Setup</a>
+				<span class="divider">/</span>
+			</li>
+			<li class="active ag-c">
+				Contest Setup
+			</li>
+			<li class="ag-cstats-bc">
+				<a href="#" class="ag-btn-contest">Contest</a>
+				<span class="divider">/</span>
+			</li>
+			<li class="active ag-cstats">
+				Contest
 			</li>
 			<li class="active ag-bl">
 				Pick Brain
