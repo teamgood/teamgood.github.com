@@ -25,10 +25,10 @@
 	</div>
 	
 
-	<div class="navbar navbar-fixed-top">
+	<div class="navbar navbar-fixed-top" id="ag-navbar">
 		<div class="navbar-inner">
 			<div class="container">
-				<span class="brand">AntGame</span>
+				<a class="brand ag-btn-root" href="#">AntGame</a>
 				<ul class="nav ag-root ag-sm ag-wl ag-bl ag-c">
 					<li><a href="./tutorial.html">How to Play</a></li>
 				</ul>
@@ -36,6 +36,42 @@
 					<a class="btn btn-warning ag-vis-on" href="#">Graphics On</a>
 					<a class="btn btn-danger ag-vis-off" href="#" style="display: none;">Graphics Off</a>
 					
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="navbar navbar-fixed-top ag-run">
+		<div class="navbar-inner">
+
+			<div class="pull-left" style="padding-left:10px;">
+				<span class="brand">
+					<img src="./img/redant-nav.png" style="margin-top: -4px;"/>
+					<span id="ag-run-red-name">team name</span>
+					&nbsp;&nbsp;
+					vs
+					&nbsp;&nbsp;
+					<img src="./img/blackant-nav.png" style="margin-top: -4px;"/>
+					<span id="ag-run-black-name">team name</span>
+				</span>
+			</div>
+			<div class="pull-right">
+				<div class="pull-right">
+					<a class="btn" id="ag-run-cancel">
+						Cancel
+					</a>
+				</div>
+				<div class="btn-group pull-right">
+					<a class="btn btn-primary" id="ag-run-speed-down">
+						<i class="icon-minus icon-white"></i>
+					</a>
+					<a class="btn btn-primary" id="ag-run-speed-up">
+						<i class="icon-plus icon-white"></i>
+					</a>
+				</div>
+				<div class="pull-right">
+					<span class="brand">speed:</span>
+					<span id="ag-run-speed">5</span>
 				</div>
 			</div>
 		</div>
@@ -365,7 +401,7 @@
 	<!-- END CONTEST DEF -->
 
 	<!--  RUN SANS DEF -->
-	<div class="ag-run-sans container">
+	<div class="ag-run-sans container" style="margin-top: -40px">
 		<div class="row">
 			<div class="span12 welcome">
 				<div class="row">
@@ -412,6 +448,34 @@
 		</div>
 	</div>
 	<!-- END RUN SANS DEF -->
+
+
+
+	<!--  RUN  DEF -->
+	<div class="ag-run" id="ag-run-container">
+
+		<div style="overflow: hidden; position: relative">
+			<div style="float: left; position: relative; left: 50%">
+				<div style="float: left; position: relative; left: -50%">
+					<canvas id="ag-run-canv-base"></canvas>
+					<div style="position: absolute; left: 0; top: 0;">
+						<canvas id="ag-run-canv-marker"></canvas>
+					</div>
+					<div style="position: absolute; left: 0; top: 0;">
+						<canvas id="ag-run-canv-food-odd"></canvas>
+					</div>
+					<div style="position: absolute; left: 0; top: 0;">
+						<canvas id="ag-run-canv-food-even"></canvas>
+					</div>
+					<div style="position: absolute; left: 0; top: 0;">
+						<canvas id="ag-run-canv-ants"></canvas>
+					</div>
+				</div>
+			</div>
+		</div>
+
+	</div>
+	<!-- END RUN DEF -->
 
 	<div class="modal" id="ag-edit" style="display: none;">
 		<div class="modal-header">
@@ -466,15 +530,6 @@
 				</tr>
 			</table>
 		</div>
-	</div>
-
-	<div id="contestSetup">
-	</div>
-	<div id="game">
-	</div>
-	<div id="makeRandomWorld">
-	</div>
-	<div id="loadBrain">
 	</div>
 
 	<!-- breadcrumbs everywhere, all up in my face -->

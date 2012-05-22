@@ -28,9 +28,11 @@ function Ant(id, color, brain, world) {
 		return this.food === 1; 
 	};
 
+	var count, d;
+
 	this.checkForDeath = function () {
-		var count = 0;
-		for (var d = 0; d < 6; d++) {
+		count = 0;
+		for (d = 0; d < 6; d++) {
 			if (!world.getAdjacentCell(this.row, this.col, d).containsAntOfColor(this.otherColor)) {
 				count++;
 				if (count > 1) {
@@ -41,21 +43,29 @@ function Ant(id, color, brain, world) {
 		this.kill();
 	};
 
+	var adjCells = [null, null, null, null, null, null];
+	var enemies = [null, null, null, null, null, null];
+	var enemyPointer = -1;
+	var i = 0;
+
 	this.checkForAdjacentDeaths = function () {
-		var adjCells = world.getAllAdjacentCells(this.row, this.col);
-		var enemies = [];
-		for (var i = 0; i < adjCells.length; i++) {
-			if (adjCells[i].containsAntOfColor(this.otherColor)) {
-				enemies.push(adjCells[i].getAnt());
+		enemyPointer = -1;
+		d = 6;
+		while (d--) {
+			adjCells[d] = world.getAdjacentCell(this.row, this.col, d);
+			if (adjCells[d].containsAntOfColor(this.otherColor)) {
+				enemies[++enemyPointer] = adjCells[d].getAnt();
 			}
 		}
-		if (enemies.length > 4) {
+		if (enemyPointer > 3) {
 			this.kill();
 		} else {
-			for (var i = 0; i < enemies.length; i++) {
-				enemies[i].checkForDeath();
+			enemyPointer++;
+			while (enemyPointer--) {
+				enemies[enemyPointer].checkForDeath();
 			}
 		}
+		
 	};
 
 	this.getAdjacentCell = function (dir) {
@@ -70,18 +80,16 @@ function Ant(id, color, brain, world) {
 		this.resting = 14;
 		this.step = function () {
 			if (--this.resting === 0) {
-				this.step = execute(this);
+				this.step = execute;
 			}
 		};
 	};
 
-	var execute = function (ant) {
-		return function () {
-			brain[ant.state](ant);
-		};
+	var execute = function () {
+		brain[this.state](this);
 	};
 
-	this.step = execute(this);
+	this.step = execute;
 
 	this.toString = function () {
 		return this.color + " ant of id " + this.id + ", dir " + 
@@ -90,7 +98,7 @@ function Ant(id, color, brain, world) {
 	};
 }
 exports.Ant = Ant;
-function AntBrain(states, color, rng) {
+function AntBrain(states, color, rng, foodCallback, markCallback, unmarkCallback) {
 	var otherColor = color === "red" ? "black" : "red";
 	var senseConditionEvaluators = {
 		"Friend": function (senseCell) {
@@ -151,31 +159,38 @@ function AntBrain(states, color, rng) {
 			return function (ant) {
 				ant.getCurrentCell().addMarker(ant.color, state.marker);
 				ant.state = state.st;
+				markCallback && markCallback(ant.row, ant.col, ant.color, state.marker);
 			};
 		},
 		"Unmark": function (state) {
 			return function (ant) {
 				ant.getCurrentCell().removeMarker(ant.color, state.marker);
 				ant.state = state.st;
+				unmarkCallback && unmarkCallback(ant.row, ant.col, ant.color, state.marker);
 			};
 		},
 		"PickUp": function (state) {
+			var cell;
 			return function (ant) {
-				var cell = ant.getCurrentCell();
+				cell = ant.getCurrentCell();
 				if (cell.hasFood() && !ant.hasFood()) {
 					cell.removeFood();
 					ant.food = 1;
 					ant.state = state.st1;
+					foodCallback && foodCallback(cell.row, cell.col, cell.getFood());
 				} else {
 					ant.state = state.st2;
 				}
 			};
 		},
 		"Drop": function (state) {
+			var cell;
 			return function (ant) {
 				if (ant.food === 1) {
-					ant.getCurrentCell().depositFood();
+					cell = ant.getCurrentCell();
+					cell.depositFood();
 					ant.food = 0;
+					foodCallback && foodCallback(cell.row, cell.col, cell.getFood());
 				}
 				ant.state = state.st;
 			};
@@ -193,8 +208,9 @@ function AntBrain(states, color, rng) {
 			};
 		},
 		"Move": function (state) {
+			var cell;
 			return function (ant) {
-				var cell = ant.getAdjacentCell(ant.dir);
+				cell = ant.getAdjacentCell(ant.dir);
 				if (cell.isAvailable()) {
 					cell.moveAntHere(ant);
 					ant.state = state.st1;
@@ -473,9 +489,20 @@ function AntGame(redBrain, blackBrain, world) {
 		return score;
 	};
 
+	var ant;
+	var withAnts = function (callback) {
+		for (var i = ants.length - 1; i >= 0; i--) {
+			ant = ants[i];
+			if (ant.alive) {
+				callback(ant.row, ant.col, ant.dir, ant.color, ant.food);
+			}
+		}
+	};
+
 	return {
 		run: run,
-		getScore: getScore
+		getScore: getScore,
+		withAnts: withAnts
 	};
 }
 exports.AntGame = AntGame;
