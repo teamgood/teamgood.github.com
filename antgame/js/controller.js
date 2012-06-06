@@ -1,4 +1,7 @@
 (function () {
+/**
+ * These are the builtin brains
+ */
 var BRAINS = [];
 
 BRAINS.push({
@@ -453,6 +456,10 @@ BRAINS.push({
 		"Move 8 11" + "\n" 
 });
 
+/**
+ * These are the builtin worlds
+ */
+
 var WORLDS = [];
 
 WORLDS.push({
@@ -637,8 +644,15 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 	WORLDS[i].thumb = view.game.gfx_utils.getWorldThumbnail(
 		model.parseAntWorld(WORLDS[i].source)
 	);
-};var EDIT = (function () {
+};
+/**
+ * This is the component source/name editor
+ */
+var EDIT = (function () {
 
+	/**
+	 * opens the editor
+	 */
 	var go = function (title) {
 		view.edit.text("title", title);
 		view.edit.text("name", "");
@@ -646,7 +660,11 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 		view.edit.show();
 	};
 
+	/**
+	 * initialises the editor
+	 */
 	var init = function () {
+		// when the user wants to cancel
 		view.edit.on("cancel", function () {
 			view.edit.hide();
 		});
@@ -657,7 +675,11 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 		init: init
 	}
 
-})();var MATCH = (function () {
+})();
+/**
+ * This controls the coordination and running of single matches.
+ */
+var MATCH = (function () {
 
 	// this holds the metadata for the match to be played
 	var _match = {
@@ -668,6 +690,9 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 		vis: true
 	};
 
+	/**
+	 * takes the user to the single match setup screen
+	 */
 	var go = function () {
 		view.menu.goto("single_match");
 		view.single_match.text("red_name", BRAINS[_match.red_id].name);
@@ -675,62 +700,94 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 		view.single_match.text("world_name", WORLDS[_match.world_id].name);
 	};
 
-
+	/**
+	 * private function 
+	 * makes sure that the number of rounds specified by the user is valid
+	 * @param str A string representation of the number of rounds
+	 */
 	function _validateRounds(str) {
 		view.single_match.text("rounds", str.replace(/\D/g, ""));
 	};
 
+	/**
+	 * private function
+	 * returns a callback that is triggered when the user decides to choose
+	 * a brain for a partucilar team
+	 * @param color The color of the team the user will be picking a brain for
+	 */
 	function _getPickCallback(color) {
 		return function () {
+			// go to the brain list
 			BRAIN_LIST.go("sm");
+			// highlight the brain currently in use
 			view.brain_list.trigger("select", [_match[color + "_id"]]);
+			// when the user picks a new one
 			view.brain_list.on("pick", function (id) { 
+				// update match object
 				_match[color + "_id"] = id;
+				// return to single match setup screen
 				go();
 			}, true);
 		};
 	};
 
-	var run = function () {
-		var f = _match.vis ? RUN : RUN_SANS;
-		f.go
-	}
-
+	/**
+	 * initialises the single match setup screen
+	 * i.e. hooks up the view
+	 */
 	var init = function () {
 		// hook up things
 		with (view.single_match) {
+			// when the user decides to pick a red brain
 			on("pick_red", _getPickCallback("red"));
+			// when the user decides to pick a black brain
 			on("pick_black", _getPickCallback("black"));
+			// when the user decides to pick a world
 			on("pick_world", function () {
+				// go to the world list
 				WORLD_LIST.go("sm");
 				WORLD_LIST.refresh();
+				// highlight the currenlty selected world
 				view.world_list.trigger("select", [_match.world_id]);
+				// when the user picks a new world
 				view.world_list.on("pick", function (id) {
+					// update match object
 					_match.world_id = id;
+					// return to the single match setup screen
 					go();
 				}, true);
 			});
+			// when the user changes the desired number of rounds
 			on("rounds_change", _validateRounds);
+			// when the user toggles graphics off
 			on("vis_off", function () {
 				_match.vis = false;
 			});
+			// when the user toggles graphics on
 			on("vis_on", function () {
 				_match.vis = true;
 			});
+			// when the user decides to run the match
 			on("go", function () {
+				// decide whether to run with or without graphics
 				var f = _match.vis ? RUN : RUN_SANS;
+				// go
 				f.go(
 					BRAINS[_match.red_id],
 					BRAINS[_match.black_id],
 					WORLDS[_match.world_id],
 					text("rounds"),
 					function (results) {
+						// on finish, show results
 						showResults(results);
+						// when the user has finished looking at the results
 						on("results_close", function () {
+							// go back to single match setup screen
 							go();
 						}, true);
 					},
 					function () {
+						// on cancel, return to single match setup screen
 						go();
 					}
 				);
@@ -741,6 +798,10 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 	return {
 		go: go,
 		init: init,
+		/**
+		 * sets or gets the id of the currently selected red brain
+		 * @param id (optional) the id of the brain to set
+		 */
 		redId: function (id) { 
 			if (typeof id === "number") {
 				_match.red_id = id;
@@ -748,6 +809,10 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 				return _match.red_id;
 			}
 		},
+		/**
+		 * sets or gets the id of the currently selected black brain
+		 * @param id (optional) the id of the brain to set
+		 */
 		blackId: function (id) { 
 			if (typeof id === "number") {
 				_match.black_id = id;
@@ -755,6 +820,10 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 				return _match.black_id;
 			}
 		},
+		/**
+		 * sets or gets the id of the currently selected world
+		 * @param id (optional) the id of the brain to set
+		 */
 		worldId: function (id) {
 			if (typeof id === "number") {
 				_match.world_id = id;
@@ -765,15 +834,28 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 	};
 
 })();
-	var CONTEST = (function () {
-	var vis = true;
+	/**
+ * This handles the coordination and running of contests
+ */
+var CONTEST = (function () {
+	var vis = true; // whether or not graphics are to be used
+
+	/**
+	 * private function
+	 * creates a list of fixtures given some brains and worlds
+	 * @param brains The brains
+	 * @param worlds The worlds
+	 * @returns a list of fixtures
+	 */
 	function getFixtures(brains, worlds) {
 		var fixtures = [];
 		var numBrains = brains.length;
 		var numWorlds = worlds.length;
+		// iterate over all possible combinations of brains and worlds
 		for (var i = 0; i < numBrains; i++) {
 			for (var j = i + 1; j < numBrains; j++) {
 				for (var k = 0; k < numWorlds; k++) {
+					// play the brains against each other as each color
 					fixtures.push({
 						red: i,
 						black: j,
@@ -797,9 +879,16 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 
 	var contest = {};
 
+	/**
+	 * private function
+	 * setus up the contest given some brains and some world(s)
+	 * @param brains The brains
+	 * @param world The worlds
+	 */
 	function setup(brains, worlds) {
 		// we've just got a list of ids. Let's copy the objects 
 		// over so if they get deleted elsewhere, we still have them.
+		// (they shouldn't get deleted elsewhere, but better safe than sorry)
 		var newBrains = [];
 		for (var i = brains.length - 1; i >= 0; i--) {
 			var brain = BRAINS[brains[i]];
@@ -830,6 +919,12 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 		contest.played_fixtures = [];
 	}
 
+	/**
+	 * private function
+	 * sorts the brains according to rank
+	 * @param brains The brains
+	 * @returns the brains ranked
+	 */
 	function getRankedBrains(brains) {
 		// first duplicate the array so we don't lose ids
 		var ranked = [];
@@ -842,13 +937,23 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 		return ranked;
 	}
 
+	/**
+	 * private function
+	 * hooks into the view to populate the rankings list
+	 */
 	function printRankings() {
 		view.contest.populateRankings(getRankedBrains(contest.brains));
 	}
 
+	/**
+	 * private function
+	 * hooks into the view to populate the fixtures lists
+	 */
 	function printFixtures() {
 		var played = [];
 		var remaining = [];
+
+		// construct the lists
 		for (var i = contest.fixtures.length - 1; i >= 0; i--) {
 			var f = contest.fixtures[i];
 			remaining.unshift({
@@ -879,6 +984,11 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 		}
 	}
 
+	/**
+	 * takes the user to the contest fixtures/stats screen
+	 * @param brains (optional) The brains to be used in the contest
+	 * @param worlds (optional) The worlds to be used in the contest
+	 */
 	var go = function (brains, worlds) {
 		if (brains && worlds) {
 			setup(brains, worlds);
@@ -888,15 +998,25 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 		view.menu.goto("contest");
 	};
 
+	/**
+	 * private function
+	 * takes the results of a fixture and modifies contest stats
+	 * @param results The results
+	 * @param fixtureId The id# of the fixture
+	 */
 	function handleResults(results, fixtureId) {
 		var f = contest.fixtures[fixtureId];
+
 		if (results.red.food > results.black.food) {
+			// red team won
 			contest.brains[f.red].score += 2;
 			f.outcome = 0;
 		} else if (results.black.food > results.red.food) {
+			// black team won
 			contest.brains[f.black].score += 2;
 			f.outcome = 2;
 		} else {
+			// draw
 			contest.brains[f.red].score += 1;
 			contest.brains[f.black].score += 1;
 			f.outcome = 1;
@@ -905,10 +1025,17 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 		contest.brains[f.black].played += 1;
 		contest.worlds[f.world].red_food += results.red.food;
 		contest.worlds[f.world].black_food += results.black.food;
+		// remove this fixture and push it to played_fixtures
 		contest.fixtures.splice(fixtureId, 1);
 		contest.played_fixtures.push(f);
 	}
 
+	/**
+	 * private function
+	 * runs a fixture without graphics
+	 * @param id The fixture id
+	 * @param onFinish Callback to execute when the match is over
+	 */
 	function run_sans(id, onFinish) {
 		var f = contest.fixtures[id];
 		RUN_SANS.go(
@@ -921,6 +1048,12 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 		);
 	}
 
+	/**
+	 * private function
+	 * runs a fixture with graphics
+	 * @param id The fixture id
+	 * @param onFinish Callback to execute when the match is over
+	 */
 	function run(id, onFinish) {
 		var f = contest.fixtures[id];
 		RUN.go(
@@ -933,10 +1066,19 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 		);
 	}
 
+
+	/**
+	 * initialises the contest stats/fixtures screen
+	 * i.e. hooks into the view
+	 */
 	var init = function () {
+		// when the user wants to play all remaining fixtures
 		view.contest.on("play_all", function () {
 			(function playAll() {
+				// run with or without graphics?
 				var func = vis ? run : run_sans;
+				
+				// do it recursive style
 				if (contest.fixtures.length > 0) {
 					func(0, function (results) {
 						handleResults(results, 0);
@@ -948,8 +1090,9 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 			})();
 		});
 
-
+		// when the user wants to play a specific fixture
 		view.contest.on("play", function (id) {
+			// run with or without graphics?
 			var func = vis ? run : run_sans;
 			func(id, function (results) {
 				handleResults(results, id);
@@ -964,10 +1107,12 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 			vis = true;
 		});
 
+		// when the user wants to see the played fixtures
 		view.contest.on("played_fixtures", function () {
 			view.contest.showPlayedFixtures();
 		});
 
+		// when the user wants to see the remaining fixtures
 		view.contest.on("remaining_fixtures", function () {
 			view.contest.showRemainingFixtures();
 		});
@@ -977,7 +1122,11 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 		go: go,
 		init: init
 	}
-})();var CONTEST_SETUP = (function () {
+})();
+/**
+ * This controls the contest setup screen
+ */
+var CONTEST_SETUP = (function () {
 
 	// this holds the metadata for the contest to be run
 	var _contest = {
@@ -987,31 +1136,53 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 		vis: true
 	};
 
+	/**
+	 * takes the user to the contest setup screen
+	 */
 	var go = function () {
 		view.menu.goto("contest_setup");
 		_refreshList("brains");
 		_refreshList("worlds");
 	};
 
+	/**
+	 * private function
+	 * refreshes a component list
+	 * @param component The component type whose list will be refreshed
+	 */
 	function _refreshList(component) {
 		if (_contest[component].length === 0) {
 			view.contest[component].sayEmpty();
 			return;
 		}
-
+		// pick resources
 		var resources = component === "brains" ? BRAINS : WORLDS;
+
+		// get and clear view list
 		var v = view.contest[component];
 		v.clear();
+
+		// now populate it
 		for (var i = _contest[component].length - 1; i >= 0; i--) {
 			var id = _contest[component][i];
 			v.add(resources[id].name, id);
 		};
 	}
 
+	/**
+	 * initialise the contest setup screen
+	 * i.e. hook stuff up to the view
+	 */
 	var init = function () {
-		// hook up things
-
+		/**
+		 * private function
+		 * initialises a list
+		 * @param component The component type whose list will be initialised
+		 */
 		function initList(component) {
+			// clist is controller list
+			// vlist is view list
+			// two sides of the same coin
 			var clist, vlist;
 			if (component === "brains") {
 				clist = BRAIN_LIST;
@@ -1020,23 +1191,41 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 				clist = WORLD_LIST;
 				vlist = view.world_list
 			}
+
+			// when the user wants to add an item for use in the contest
 			view.contest[component].on("add", function () {
+				// go to the list's screen
 				clist.go("c", true);
+
+				// don't show any that are already selected
 				for (var i = _contest[component].length - 1; i >= 0; i--) {
 					clist.dontShowId(_contest[component][i]);
 				}
+
+				// refresh to shows the changes we just made
 				clist.refresh();
+
+				// when the user picks an item for use in the contest
 				vlist.on("pick", function (id) {
+					// if the item is not already in our list (this is a bit
+					// an over-cautious sanity check)
 					if (_contest[component].indexOf(id) === -1) {
+						// add the item to the selected components list
 						_contest[component].push(id);
+						// tell the controller list not to display it anymore.
 						clist.dontShowId(id, true, function () { go(); });
 					}
 				}, true);
 			});
 
+			// when the user wants to dismiss an item from the selected 
+			// components list
 			view.contest[component].on("dismiss", function (id) {
+				// if the item is actually in the list (another over-cautious
+				// sanity check)
 				var i = _contest[component].indexOf(id);
 				if (i > -1) {
+					// remove the item and refresh the list
 					_contest[component].splice(i, 1);
 					_refreshList(component);
 				}
@@ -1046,6 +1235,7 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 		initList("brains");
 		initList("worlds");
 
+		// when the user is done and wants to start the contest
 		view.contest.on("go", function () {
 			CONTEST.go(_contest.brains, _contest.worlds);
 		});
@@ -1057,9 +1247,22 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 	};
 
 })();
-	var RUN_SANS = (function () {
+	/**
+ * This controls the running of matches without graphics
+ */
+var RUN_SANS = (function () {
 
+	/**
+	 * takes the user to the screen and begins the match
+	 * @param red The red brain
+	 * @param black The black brain
+	 * @param world The world
+	 * @param rounds The number of rounds
+	 * @param onFinish The callback to execute when the match is done
+	 * @param onCancel The callback to execute when the match is cancelled
+	 */
 	var go = function (red, black, world, rounds, onFinish, onCancel) {
+		// setup the match
 		var rng = model.RandomNumberGenerator();
 		var redBrain = model.AntBrain(
 			model.parseAntBrain(red.source), 
@@ -1074,30 +1277,42 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 		var antworld = model.AntWorld(model.parseAntWorld(world.source));
 		var game = model.AntGame(redBrain, blackBrain, antworld);
 
+		// setup the text components
 		view.run_sans.text("red_name", red.name);
 		view.run_sans.text("black_name", black.name);
 		view.run_sans.text("world_name", world.name);
 
+		// when the user cancels the match
 		view.run_sans.on("cancel", function () {
 			tearDown();
 			onCancel();
 		}, true);
 
+		// hide the menu, go to the screen, and start the match
 		view.menu.goto("run_sans");
 		view.menu.hideBreadcrumbs();
 		run(game, rounds, onFinish);
 	};
 
-
+	/**
+	 * private function
+	 * runs a game
+	 * @param game The game to run
+	 * @param rounds The number of rounds for which to run the game
+	 * @param onFinish The callback to execute when the game has finished
+	 */
 	function run(game, rounds, onFinish) {
-		var i = 0;
+		var i = 0; // the number of rounds already completed
+
 		function updateProgressBar() {
 			view.run_sans.text(
 				"progress",
 				Math.floor(100 / rounds * i) + "%"
 			);
 		}
+
 		function doSomeRounds() {
+			// run the game in chunks of 500 rounds
 			var numToRun = Math.min(500, rounds - i);
 			if (numToRun > 0) {
 				game.run(numToRun);
@@ -1110,6 +1325,8 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 			}
 		}
 		window.addEventListener('message', doSomeRounds, false);
+
+		// stop the loop propogation
 		removeEventListener = function () {
 			window.removeEventListener('message', doSomeRounds, false);
 		};
@@ -1127,14 +1344,30 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 	return {
 		go: go
 	};
-})();var RUN = (function () {
+})();
+/**
+ * This controls the running of the game with graphics
+ */
+var RUN = (function () {
 
 	var speed = 3;
 
+	/**
+	 * takes the user to the graphics
+	 * @param red The red brain
+	 * @param black The black brain
+	 * @param world the world
+	 * @param round The number of rounds
+	 * @param onFinish The callback to execute when the game has finished
+	 * @param onCancel The callback to execute when the game is cancelled
+	 */
 	var go = function (red, black, world, rounds, onFinish, onCancel) {
+		// precompile sprites
 		view.game.setup(model.parseAntWorld(world.source));
+		// take the user to the screen
 		view.menu.goto("run");
 
+		//********* setup match *********//
 		var rng = model.RandomNumberGenerator();
 		var redBrain = model.AntBrain(
 			model.parseAntBrain(red.source), 
@@ -1155,6 +1388,7 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 		var antworld = model.AntWorld(model.parseAntWorld(world.source));
 		var game = model.AntGame(redBrain, blackBrain, antworld);
 
+		// hook up callbacks
 		view.game.on("speed_up", function () {
 			speed = Math.min(speed + 1, 10);
 			view.game.text("speed", speed + "");
@@ -1170,6 +1404,7 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 			onCancel();
 		}, true);
 
+		// hide menu and go
 		view.menu.hideBreadcrumbs();
 		run(game, rounds, onFinish);
 
@@ -1180,22 +1415,38 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 
 	};
 
+	/**
+	 * private function
+	 * runs a game
+	 * @param game The game to run
+	 * @param rounds The number of rounds the game is to be run
+	 * @param onFinish the callback to execute when the game finishes
+	 */
 	function run(game, rounds, onFinish) {
-		var i = 0;
-		function updateProgressBar() {
+		var i = 0; // how many rounds we've already completed
+
+		function updateScreen() {
 			view.game.newFrame();
 			game.withAnts(view.game.drawAnt);
 		}
-		var timeout;
+
+		var timeout; // we need to use a setTimeout to get things slow
+
+		// this function does some rounds according to speed and how many
+		// rounds remain
 		function doSomeRounds() {
-			var numToRun = Math.min(10 * speed, rounds - i);
+			// decide how many rounds to do
+			var numToRun = Math.min(Math.max(11 * speed-1, 1), rounds - i);
 			if (numToRun > 0) {
+				// do the rounds
 				game.run(numToRun);
 				i += numToRun;
-				updateProgressBar();
+				updateScreen();
 				if (speed < 6) {
+					// make it a bit slow
 					timeout = setTimeout(doSomeRounds, 30);
 				} else {
+					// super fastness
 					window.postMessage('','*');
 				}
 			} else {
@@ -1203,16 +1454,40 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 				onFinish(game.getScore());
 			}
 		}
+		/* For those who are not familiar with javascript:
+			There are no threads in javascript, so if you want to do something
+			which is gonna take a while without locking up the UI, you have to
+			split that thing into chunks, making calls to some browser function
+			that allows the UI to be updated in between those chunks. There are
+			three primary ways of doing this that I am aware of:
+				- Using setTimeout or setInterval
+				- using window.postMessage
+				- using requestAnimationFrame
+			With the set* functions and requestAF function, there is normally a
+			significant time delay (around 10ms but it varies from browser to
+			browser) involved which means that you're wasting CPU cycles. The
+			postMessage function has almost no delay in modern browsers, though
+			it is not intended to be used in this way. I have used it here, and
+			it is good. I have also used setTimeout when the need to slow things
+			down a bit arises.
+		*/
+
+		// this is for the postMessage function
 		window.addEventListener('message', doSomeRounds, false);
+
+		// remove looping mechanisms
 		removeEventListener = function () {
 			clearTimeout(timeout);
 			window.removeEventListener('message', doSomeRounds, false);
 		};
+
+		// begin execution
 		doSomeRounds();
 	}
 
 	var removeEventListener = function () {};
 
+	// stop things from happening, and show the nav stuff again.
 	function tearDown() {
 		removeEventListener();
 		view.menu.showBreadcrumbs();
@@ -1221,76 +1496,136 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 	return {
 		go: go
 	};
-})();var MENU = {
+})();
+/**
+ * This controls basic menu navigation
+ */
+var MENU = {
+	/**
+	 * takes the user to the root of the main menu
+	 */
 	go: function () { view.menu.goto("root"); },
 
+	/**
+	 * initialises the menu
+	 * i.e. hooks it up to the view
+	 */
 	init: function () {
 		view.menu.on("goto_root", this.go);
 		view.menu.on("goto_single_match", MATCH.go);
 		view.menu.on("goto_contest", CONTEST_SETUP.go);
 		this.go();
 	}
-};function getListHandler(list, resources, initCallback) {
-	var _highlighted = 0;
+};
+/**
+ * This function returns an object which handles the display of either the
+ * brain or world list.
+ * @param list The type of list. Either "brains" or "worlds".
+ * @param resources The array of items which will be coupled with the list
+ * @param initCallback A function to be called when the handler is initialised
+ * @returns the handler
+ */
+function getListHandler(list, resources, initCallback) {
+	var _highlighted = 0; // the id of the currently-highlighted item
 
-	var _excludes = [];
+	var _excludes = []; // ids of items not to show
 
+	/**
+	 * refreshes the list
+	 */
 	var refresh = function () {
+		// if there's nothing to be shown
 		if (_excludes.length === resources.length) {
 			view[list].sayEmpty();
-			return;
-		}
-		view[list].clear();
-		for (var i = 0, len = resources.length; i < len; i++) {
-			if (_excludes.indexOf(i) === -1) {
-				view[list].add(resources[i].name, i, resources[i].preset);
+
+		} else {
+			view[list].clear();
+			// add items
+			for (var i = 0, len = resources.length; i < len; i++) {
+				if (_excludes.indexOf(i) === -1) {
+					view[list].add(resources[i].name, i, resources[i].preset);
+				}
 			}
+			// select currently highlighted item
+			view[list].trigger("select", [_highlighted]);
 		}
-		view[list].trigger("select", [_highlighted]);
 	};
 
+	/**
+	 * adds an item to the list
+	 * @param obj The item to be added
+	 */
 	var add = function (obj) {
 		resources.push(obj);
-		var i = resources.length - 1;
+		// highlight this one
 		_highlighted = resources.length - 1;
 		refresh();
 	};
 
-	// return new highlighted
+	/**
+	 * removes an item from the list
+	 * @param id The id of the item to remove
+	 * @param callback Removal of items from a list might be troublesome for
+	 *        situations where that item is being used somewhere, so this
+	 *        callback is called with the id of the item which is highlighted
+	 *        after removal.
+	 */
 	var remove = function (id, callback) {
+		// remove the item from the resources list
 		resources.splice(id, 1);
+
+		// if we need to change the id of whichever item was highlighted
 		if (id <= _highlighted) {
 			do { 
 				_highlighted--; 
+			// while there are still items to be highlighted
 			} while (_highlighted >= 0 && _excludes.indexOf(_highlighted) !== -1);
 		}
 		refresh();
 		if (typeof callback === "function") { callback(_highlighted); }
 	};
 
-
+	/**
+	 * excludes a particular id from being shown in the list, but doesn't
+	 * delete it from the resources
+	 * @param id The id of the item to exclude
+	 * @param reload whether or not to update the view after the item has
+	 *        been excluded
+	 * @param onEmpty A function to call if this exclude resulted in there
+	 *        being no items to display.
+	 */
 	var dontShowId = function (id, reload, onEmpty) {
+		// if this id is not already being excluded
 		if (_excludes.indexOf(id) === -1) {
 			_excludes.push(id);
+			// if there's nothing to display
 			if (_excludes.length === resources.length &&
 				typeof onEmpty === "function") {
 				onEmpty();
+			// else if we need to highlight a new item
 			} else if (id === _highlighted) {
 				do { 
 					_highlighted--; 
 				} while (_highlighted >= 0 && _excludes.indexOf(_highlighted) !== -1);
+				// if we didn't find anything to highlight by decrementing
 				if (_highlighted === -1) {
+					// start again but increment
 					_highlighted = id;
 					do {
 						_highlighted++
 					} while (_highlighted < resources.length && _excludes.indexOf(_highlighted) !== -1)
 				}
+				// select the newly highlighted thing
 				view[list].trigger("select", [_highlighted]);
 			}
 			if (reload) { refresh(); }
 		}
 	};
 
+	/**
+	 * unexcludes an id, or all ids
+	 * @param id The id of the item to unexclude, or "all" to show everything
+	 */
 	var showId = function (id) {
 		if (id === "all") {
 			_excludes = [];
@@ -1301,8 +1636,14 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 		}
 	};
 
+	/**
+	 * initialises the list handler
+	 * i.e. hooks it up to the view
+	 */
 	var init = function () {
+		// when the user clicks on a list item
 		view[list].on("select", function (id) {
+			// highlight it
 			view[list].highlight(id);
 			_highlighted = id;
 		});
@@ -1318,11 +1659,22 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 		showId: showId,
 		refresh: refresh
 	};
-}var BRAIN_LIST = (function () {
+}
+/**
+ * This controls the list of brains which the user can use in matches and
+ * contests
+ */
+var BRAIN_LIST = (function () {
 
+	/**
+	 * private function
+	 * attempts to compile a brain from source code
+	 * @returns an object representing the brain
+	 */
 	function _compileBrain() {
 		try {
 			var source = view.edit.text("code");
+			// this next like will throw the error if badness happens
 			model.parseAntBrain(source);
 			var brain = {
 				name: view.edit.text("name").trim() || "Untitled Brain",
@@ -1332,42 +1684,66 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 			view.edit.hide();
 			return brain;
 		} catch (err) {
+			// just tell the user what the error was
 			window.alert(err.message);
 		}
 	}
 
+	/**
+	 * initialises the brain list.
+	 * i.e. hooks into the view component, setting up what to do when events
+	 * occur and the like
+	 */
 	var init = function () {
 		var that = this;
+
+		// when a list item is clicked on
 		view.brain_list.on("select", function (id) {
+			// show its source code
 			var text = !!BRAINS[id] ? BRAINS[id].source : "";
 			view.brain_list.text("source", text);
 		});
 
-		
-
+		// when the user wants to add a new brain
 		view.brain_list.on("add", function () {
+			// go to edit dialog
 			EDIT.go("Add New Brain");
+			// when the user has finished and wants to compile
 			view.edit.on("compile", function () { 
+				// try to compile
 				var result = _compileBrain();
+				// if successful, add it to the list
 				if (result) { that.add(result); }
 			}, true);
 		}); 
 
+		// when the user wants to edit a brain
 		view.brain_list.on("edit", function (id) {
+			// go to edit dialog
 			EDIT.go("Edit Brain");
+			// set input field values
 			view.edit.text("name", BRAINS[id].name);
 			view.edit.text("code", BRAINS[id].source);
+			// when the user has finished and wants to compile
 			view.edit.on("compile", function () { 
+				// try to compile
 				var result = _compileBrain();
 				if (result) { 
+					// if successful, change the brain definition
 					BRAINS[id] = result;
+					// trigger display update
 					that.refresh();
 				}
 			}, true);
 		});
 
+		// when the user wants to delete a brain
 		view.brain_list.on("delete", function (id) {
+			// just delete the brain.
 			that.remove(id, function (highlighted) {
+				// if a brain that was selected for a match was delted,
+				// we need to update the match object according to which
+				// brain is now highlighted in the list.
 				if (id === MATCH.redId()) {
 					MATCH.redId(highlighted);
 				}
@@ -1377,22 +1753,41 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 			});
 		});
 	};
+
 	var handler =  getListHandler("brain_list", BRAINS, init);
 
+	/**
+	 * takes the user to the brain list
+	 * @param from The place where the user came from. Either 'sm' for single
+	 *        match or 'c' for contest.
+	 */	
 	handler.go = function (from) {
 		view.menu.goto(from + "_pick_brain");
 		this.showId("all");
 	};
 
 	return handler;
-})();var WORLD_LIST = (function () {
+})();
+/**
+ * This controls the list of worlds that lets the user pick worlds to use in
+ * matches or contests
+ */
+var WORLD_LIST = (function () {
 	var contest = false;
 	
+	/**
+	 * private function
+	 * tries to compile the world
+	 * @returns The compiled world on success, undefined on failure
+	 */
 	function _compileWorld() {
 		try {
 			var source = view.edit.text("code");
 			var parsed = model.parseAntWorld(source, contest);
 			var worldIsContestLegal = true;
+			// if we're not specifically looking for a contest world, we still
+			// need to check whether it is legal in case the user wants to use
+			// it in a contest later
 			if (!contest) {
 				try {
 					model.parseAntWorld(source, true);
@@ -1414,24 +1809,38 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 		}
 	}
 
+	/**
+	 * initialises the world list
+	 * i.e. hooks it up to the view
+	 */
 	var init = function () {
 		var that = this;
 
+		// when the user clicks a world in the list
 		view.world_list.on("select", function (id) {
+			// show the thumbnail
 			WORLDS[id] && view.world_list.thumb(WORLDS[id].thumb);
 		});
 
+		// when the user wants to add a new world
 		view.world_list.on("add", function () {
+			// show the edit dialog
 			EDIT.go("Add New World");
+			// when the user wants to compile their new world
 			view.edit.on("compile", function () {
+				// try to compile it
 				var result = _compileWorld();
+				// if success, add it to the list
 				if (result) { that.add(result); }
 			}, true);
 		});
 
 		var numWorldsGenerated = 0;
+		// when the user wants to generate a random world
 		view.world_list.on("generate", function () {
+			// get the source
 			var source = model.generateRandomWorld();
+			// create the object
 			var w = {
 				name: "Random World " + (numWorldsGenerated++),
 				preset: false,
@@ -1439,25 +1848,38 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 				source: source,
 				thumb: view.game.gfx_utils.getWorldThumbnail(model.parseAntWorld(source))
 			};
+			// add to list
 			that.add(w);
 		});
 
+		// when the user wants to edit a world
 		view.world_list.on("edit", function (id) {
+			// go to edit dialog
 			EDIT.go("Edit World");
+			// when the user wants to compile
 			view.edit.on("compile", function () {
+				// try to compile
 				var result = _compileWorld();
+				// if success
 				if (result) {
+					// change the world def
 					WORLDS[id] = result;
+					// refresh the list
 					that.refresh();
 				}
 			}, true);
+			// set the contents of the input fields
 			view.edit.text("name", WORLDS[id].name);
 			view.edit.text("code", WORLDS[id].source);
 		});
 
+		// when the user wants to delete a world
 		view.world_list.on("delete", function (id) {
+			// just delete it
 			that.remove(id, function (highlighted) {
+				// if they deleted the world already in use
 				if (id === MATCH.worldId()) {
+					// use the one that is highlighted now
 					MATCH.worldId(highlighted);
 				}
 			});
@@ -1465,12 +1887,20 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 	};
 
 	var handler = getListHandler("world_list", WORLDS, init);
+
+	/**
+	 * takes the user to the world list
+	 * @param from The place where the user came from. Either 'sm' for single
+	 *        match setup or 'c' for contest setup
+	 */
 	handler.go = function (from) {
 		contest = from === "c";
 		view.menu.goto(from + "_pick_world");
 		this.showId("all");
 
+		// if contest
 		if (contest) {
+			// exclude contest-illegal worlds
 			for (var i = WORLDS.length - 1; i >= 0; i--) {
 				if (WORLDS[i].contest === false) {
 					this.dontShowId(i);
@@ -1483,7 +1913,13 @@ for (var i = WORLDS.length - 1; i >= 0; i--) {
 
 	return handler;
 	
-})();$(document).ready(function () {
+})();
+/**
+ * When the document is ready, according to jquery, we initialise the
+ * controller submodules.
+ */
+
+$(document).ready(function () {
 	
 	view.init();
 	BRAIN_LIST.init();

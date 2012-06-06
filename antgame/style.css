@@ -1,3 +1,7 @@
+/**
+ * This is some extra styling (on top of bootstrap) to make the application
+ * look nice.
+ */
 .welcome {
   background: white;
   border-radius: 7px;

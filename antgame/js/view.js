@@ -1,15 +1,33 @@
 var view = (function () {
 
 var exports = {};
+/**
+ * LogicalGroup
+ * This is the fundamental javascript component of the view module. It gives
+ * a neat abstraction for dealing with events and updating text on the screen
+ * for some logically-grouped set of DOM elements or other things.
+ * @param events The events which this group deals with
+ * @param textElems The text elements which this group deals with.
+ * @returns the logical group
+ */
 function LogicalGroup(events, textElems) {
 	this.events = events;
 	this.callbacks = {};
 	this.textElems = textElems;
 
+	// set callback lists based on event names
 	for (var i = events.length - 1; i >= 0; i--) {
 		this.callbacks[events[i].name] = [];
-	};
+	}
 
+	/**
+	 * This binds a callback to a particular event
+	 * @param evnt The event to bind
+	 * @param callback The callback to call when the event is triggered
+	 * @param overwrite (optional) if set to a truthy value, deletes any 
+	 *        callbacks previously registered with this event before adding
+	 *        the new one.
+	 */
 	this.on = function (evnt, callback, overwrite) {
 		if (Array.isArray(this.callbacks[evnt]) && typeof callback === "function") {
 			if (overwrite) {
@@ -19,6 +37,14 @@ function LogicalGroup(events, textElems) {
 		}
 	};
 
+	/**
+	 * Gets or sets the desired text element
+	 * @param elem The name of the text element
+	 * @param text (optional) if set and a string, sets the text of the given
+	 *        text element to the value passed.
+	 * @returns undefined if text given, the current text of the element
+	 *          otherwise.
+	 */
 	this.text = function (elem, text) {
 		if (this.textElems[elem]) {
 			if (typeof text === 'string') {
@@ -29,6 +55,12 @@ function LogicalGroup(events, textElems) {
 		}
 	};
 
+	/**
+	 * triggers an event
+	 * @param evnt The event to trigger
+	 * @param argsArray (optional) A list of arguments to pass to any bound 
+	 *        callbacks
+	 */
 	this.trigger = function (evnt, argsArray) {
 		if (Array.isArray(this.callbacks[evnt])) {
 			// iterate over callbacks and call them!
@@ -39,6 +71,10 @@ function LogicalGroup(events, textElems) {
 		}
 	};
 
+	/**
+	 * initialises the logical group. Specifically, it binds the callback
+	 * interface to the specified DOM elements.
+	 */
 	this.init = function () {
 		var that = this;
 		for (var i = this.events.length - 1; i >= 0; i--) {
@@ -54,9 +90,23 @@ function LogicalGroup(events, textElems) {
 		};
 	};
 }
+/**
+ * private function
+ * This function creates an abstract item list. It is used for the worlds and
+ * brains in the lists where you can select, delete, edit etc. See BrainList.js
+ * and WorldList.js
+ */
 function getItemList (events, textElems, baseElem) {
-	var highlighted = 0;
+	var highlighted = 0; // the id of the item currently highlighted
 	var list = new LogicalGroup(events, textElems);
+
+	/**
+	 * adds a new item to the list
+	 * @param name The name of the item
+	 * @param id The unique id number of the item
+	 * @param preset A boolean value stating whether or not the item is built
+	 *        in to the game.
+	 */
 	list.add = function (name, id, preset) {
 		// compile individual html elements
 		var list_item = world_name = btn_group = edit_btn = del_btn = pick_btn = "";
@@ -89,14 +139,17 @@ function getItemList (events, textElems, baseElem) {
 
 		// attach the html elements to the DOM and set up events & callbacks
 
+		// create list item
 		var li = $(list_item).prependTo("#ag-" + baseElem + "-list");
+		// create link element
 		var a = $(world_name).appendTo(li);
-
+		// create button group
 		var btns = $(btn_group).appendTo(a).hide();
 
-		var that = this;
 
+		var that = this; // standard js closure fiddle
 		if (!preset) {
+			// only allow deletes and edits for non-preset items
 			var del = $(del_btn).appendTo(btns);
 			del.click(function (event) { 
 				event.stopPropagation();
@@ -113,6 +166,7 @@ function getItemList (events, textElems, baseElem) {
 			that.trigger("pick", [id]); 
 		});
 
+		// show buttons only on hover
 		li.hover(
 			function (event) {
 				btns.show();
@@ -126,21 +180,35 @@ function getItemList (events, textElems, baseElem) {
 		li.click(function () { that.trigger("select", [id]); });
 	};
 
+	/**
+	 * highlights the desired item
+	 * @param id The id of the item to be highlighted
+	 */
 	list.highlight = function (id) {
 		$(".ag-" + baseElem + "-item[id='" + highlighted + "']").removeClass("active");
 		$(".ag-" + baseElem + "-item[id='" + id + "']").addClass("active");
 		highlighted = id;
 	};
 
+	/**
+	 * clears the list
+	 */
 	list.clear = function () {
 		$("#ag-" + baseElem + "-list").html("");
 	};
 
+	/**
+	 * removes the desired item
+	 * @param id The id of the item to be removed
+	 */
 	list.remove = function (id) {
 		$(".ag-" + baseElem + "-item[id='" + id + "']").remove();
 	};
 
-	list.sayEmpty = function (id) {
+	/**
+	 * clears the list and displays an "empty" message
+	 */
+	list.sayEmpty = function () {
 		$("#ag-" + baseElem + "-list").html('<li class="nav-header">empty</li>');
 	};
 
@@ -149,10 +217,15 @@ function getItemList (events, textElems, baseElem) {
 
 var LogicalGroup = LogicalGroup || function () {};
 
+/**
+ * this provides an access layer to the dynamic elements which comprise the
+ * list of available brains that the user may choose for matches or contests.
+ */
 (function () {
 
 var events = [
 	{
+		// the button that allows a user to add a new brain
 		name: "add",
 		binder: function (callback) {
 			$("#ag-bl-add").click(callback);
@@ -160,24 +233,32 @@ var events = [
 	},
 	// these next four events are bound dynamically
 	{
+		// the button on a particular brain which allows the user to edit the
+		// source code and name
 		name: "edit",
 		binder: function () {}
 	},
 	{
+		// the button on a particular brain which allows the user to pick it
+		// for use in a match or contest
 		name: "pick",
 		binder: function () {}
 	},
 	{
+		// triggered when the user clicks over the brain item in the list
 		name: "select",
 		binder: function () {}
 	},
 	{
+		// the button on a particular brain which allows the user to delete it
 		name: "delete",
 		binder: function () {}
 	}
 ];
 
 var textElems = {
+	// source is the <pre> box on the right hand side of the brain list screen.
+	// it shows the source code of the highlighted brain
 	source: {
 		get: function () { return $("#ag-bl-selected-source").html(); },
 		set: function (text) { $("#ag-bl-selected-source").html(text); }
@@ -189,17 +270,22 @@ exports.brain_list = getItemList(events, textElems, "bl");
 
 })();
 var getItemList = getItemList || function () {};
-
+/**
+ * this provides an access layer to the dynamic elements which comprise the
+ * list of available worlds that the user may choose for matches or contests.
+ */
 (function () {
 
 var events = [
 	{
+		// the button to add a new world
 		name: "add",
 		binder: function (callback) {
 			$("#ag-wl-add").click(callback);
 		}
 	},
 	{
+		// the button to generate a new pseudo-random world
 		name: "generate",
 		binder: function (callback) {
 			$("#ag-wl-gen").click(callback);
@@ -207,18 +293,22 @@ var events = [
 	},
 	// these next four events are bound dynamically
 	{
+		// button to edit a world's source  code / name
 		name: "edit",
 		binder: function () {}
 	},
 	{
+		// button to pick a world for use in contest/match
 		name: "pick",
 		binder: function () {}
 	},
 	{
+		// triggered when the user clicks over the world in the list
 		name: "select",
 		binder: function () {}
 	},
 	{
+		// button to delete a world from the list.
 		name: "delete",
 		binder: function () {}
 	}
@@ -235,26 +325,37 @@ exports.world_list.thumb = function (canvas) {
 
 
 
+/**
+ * this provides an access layer to the dynamic elements which comprise the
+ * contest fixtures/stats screen.
+ */
 (function () {
 
 var events = [
 	{
+		// the button which takes the user from the setup screen to the
+		// fixtures/stats screen
 		name: "go",
 		binder: function (callback) {
 			$("#ag-c-go").click(callback);
 		}
 	},
 	{
+		// the button on the fixtures/stats screen which lets the user play all
+		// of the remaining matches sequentially
 		name: "play_all",
 		binder: function (callback) {
 			$("#ag-c-play-all").click(callback);
 		}
 	},
 	{
+		// the button on a particular fixture which allows the user to play that
+		// particular fixture independently
 		name: "play",
 		binder: function () {} // bound dynamically
 	},
 	{
+		// triggered when the user toggles the graphics to be off
 		name: "vis_off",
 		binder: function (callback) {
 			$(".ag-vis-on").click(function () {
@@ -263,6 +364,7 @@ var events = [
 		}
 	},
 	{
+		// triggered when the user toggles the graphics to be on
 		name: "vis_on",
 		binder: function (callback) {
 			$(".ag-vis-off").click(function () {
@@ -271,12 +373,14 @@ var events = [
 		}
 	},
 	{
+		// the tab which shows the list of played fixtures
 		name: "played_fixtures",
 		binder: function (callback) {
 			$("#ag-c-fix-played-link").click(callback);
 		}
 	},
 	{
+		// the tab which shows the list of remaining fixtures
 		name: "remaining_fixtures",
 		binder: function (callback) {
 			$("#ag-c-fix-rem-link").click(callback);
@@ -285,10 +389,14 @@ var events = [
 ];
 
 var textElems = {
+	// the number of fixtures played
+	// shown in the related tab
 	fixtures_played: {
 		get: function () { $("#ag-c-fix-played-text").text(); },
 		set: function (text) { $("#ag-c-fix-played-text").text(text); }
 	},
+	// the number of fixtures remaining
+	// shown in the related tab
 	fixtures_remaining: {
 		get: function () { $("#ag-c-fix-rem-text").text(); },
 		set: function (text) { $("#ag-c-fix-rem-text").text(text); }
@@ -298,16 +406,28 @@ var textElems = {
 
 exports.contest = new LogicalGroup(events, textElems);
 
+/**
+ * Shows the table of remaining fixtures
+ */
 exports.contest.showRemainingFixtures = function () {
 	showHideFixtures("rem", "played");
 	$("#ag-c-play-all").show();
 };
 
+/**
+ * shows the table of played fixtures
+ */
 exports.contest.showPlayedFixtures = function () {
 	showHideFixtures("played", "rem");
 	$("#ag-c-play-all").hide();
 };
 
+/**
+ * private function
+ * toggles between played/remaining fixtures tables
+ * @param toShow The type of fixtures to show
+ * @param toHide The type of fixtures to hide
+ */
 function showHideFixtures(toShow, toHide) {
 	$("#ag-c-fix-" + toHide + "-link").parent().removeClass("active");
 	$("#ag-c-fix-" + toHide).hide();
@@ -315,14 +435,32 @@ function showHideFixtures(toShow, toHide) {
 	$("#ag-c-fix-" + toShow).show();
 }
 
+/**
+ * populates the rankings table with brains and stats
+ * @param rankedBrains A sorted list of brains along with stats metadata.
+ */
 exports.contest.populateRankings = function (rankedBrains) {
+	// get table element
 	var t = $("#ag-c-rankings");
+
+	// clear it, and create the headings
 	t.html("");
-	t.append('<thead><tr><th>Rank</th><th>Brain</th><th>Played</th><th>Score</th></tr></thead>');
+	var headings = "";
+	headings += "<thead>";
+	headings +=   "<tr>";
+	headings +=     "<th>Rank</th>";
+	headings +=     "<th>Brain</th>";
+	headings +=     "<th>Played</th>";
+	headings +=     "<th>Score</th>";
+	headings +=   "</tr>";
+	headings += "</thead>";
+	t.append(headings);
 
 	var rank = 1;
 	var numBrains = rankedBrains.length;
+	// iterate over brains
 	for (var i = 0; i < numBrains; i++) {
+		// construct table row html and insert into document
 		var row = "";
 		row += "<tr>";
 		row += "<td>" + rank + "</td>";
@@ -331,32 +469,62 @@ exports.contest.populateRankings = function (rankedBrains) {
 		row += "<td>" + rankedBrains[i].score + "</td>";
 		row += "</tr>";
 		t.append(row);
-		if (i < numBrains - 1 && rankedBrains[i].score !== rankedBrains[i + 1].score) {
+		if (i < numBrains - 1 && 
+			rankedBrains[i].score !== rankedBrains[i + 1].score) {
 			rank++;
 		}
 	}
 };
 
+/**
+ * Populates the table of remaining fixtures
+ * @param fixtures A list of fixtures that haven't been played yet
+ */
 exports.contest.populateRemainingFixtures = function (fixtures) {
 	var numFixtures = fixtures.length;
 	this.text("fixtures_remaining", numFixtures + "");
+
+	// get table element
 	var t = $("#ag-c-fix-rem");
+
+	// clear it and insert table headings
 	t.html("");
-	t.append('<thead><tr><th>Red Brain</th><th>Black Brain</th><th>World</th></tr></thead>');
+	var headings = "";
+	headings += "<thead>";
+	headings +=   "<tr>";
+	headings +=     "<th>Red Brain</th>";
+	headings +=     "<th>Black Brain</th>";
+	headings +=     "<th>World</th>";
+	headings +=   "</tr>";
+	headings += "</thead>";
+	t.append(headings);
+
+	// it is possible for this list to be empty, so check if that is the case
+	// and output an appropriate row saying so
 	if (numFixtures === 0) {
-		t.append("<tr><td colspan='3'><span style='font-style: italic'>none</span></td></tr>")
+		t.append("<tr><td colspan='3'>" +
+		           "<span style='font-style: italic'>none</span>" +
+		         "</td></tr>");
 		return;
 	}
 
+	// iterate over fixtures
 	for (var i = 0; i < numFixtures; i++) {
+		// create row
 		var row = $("<tr></tr>").appendTo(t);
+		// create cells
 		$("<td>" + fixtures[i].red_name + "</td>").appendTo(row);
 		$("<td>" + fixtures[i].black_name + "</td>").appendTo(row);
 		$("<td>" + fixtures[i].world_name + "</td>").appendTo(row);
+
+		// create an empty cell in which to put the play button
 		var finalCell = $("<td style='border-left: none;'></td>").appendTo(row);
 		var play_btn = $('<a class="btn btn-mini btn-primary pull-right"' + 
-		                 'style="position:absolute; margin-left: -35px;">play &raquo;</a>').appendTo(finalCell).hide();
+		                 'style="position:absolute; margin-left: -35px;">' +
+		                 'play &raquo;</a>').appendTo(finalCell).hide();
 
+		// hook up play button with event listener and make it appear only on 
+		// mouse hover
 		with ({id: fixtures[i].id, that: this, pb: play_btn}) {
 			play_btn.click(function () {
 				that.trigger("play", [id]);
@@ -367,12 +535,17 @@ exports.contest.populateRemainingFixtures = function (fixtures) {
 	}
 };
 
+// the colors that brain names are given depending on how they performed in a
+// particular fixture
 var colors = {
 	win: "#A22",
 	lose: "#000",
 	draw: "#22A"
 };
 
+// this is just to make it easier to check what color a brain should be
+// given the 'outcome' property of a fixture (which is 0 for red win, 1 for 
+// draw, 2 for black win)
 var team_colors = {
 	red: {
 		"0": colors["win"],
@@ -386,22 +559,52 @@ var team_colors = {
 	}
 };
 
+/**
+ * private function
+ * gets some html which colors a string of text
+ * @param color The color of the ant brain during the fixture
+ * @param name The name of the ant brain
+ * @param outcome The outcome of the fixture
+ * @returns name wrapped in <span> tags with appropriate color style
+ */
 function getColoredName(color, name, outcome) {
 	color = team_colors[color][outcome];
 	return '<span style="color: ' + color + '">' + name + '</span>';
 }
 
+/**
+ * Populates the table of played fixtures
+ * @param fixtures The fixtures which have been played
+ */
 exports.contest.populatePlayedFixtures = function (fixtures) {
 	var numFixtures = fixtures.length;
 	this.text("fixtures_played", numFixtures + "");
+
+	// get table element
 	var t = $("#ag-c-fix-played");
+
+	// clear it and insert table headings
 	t.html("");
-	t.append('<thead><tr><th>Red Brain</th><th>Black Brain</th><th>World</th></tr></thead>');
+	var headings = "";
+	headings += "<thead>";
+	headings +=   "<tr>";
+	headings +=     "<th>Red Brain</th>";
+	headings +=     "<th>Black Brain</th>";
+	headings +=     "<th>World</th>";
+	headings +=   "</tr>";
+	headings += "</thead>";
+	t.append(headings);
+
+	// it is possible for this list to be empty, so check if that is the case
+	// and output an appropriate row saying so
 	if (numFixtures === 0) {
-		t.append("<tr><td colspan='3'><span style='font-style: italic'>none</span></td></tr>")
+		t.append("<tr><td colspan='3'>" +
+		           "<span style='font-style: italic'>none</span>" +
+		         "</td></tr>");
 		return;
 	}
 
+	// iterate over fixtures to build table row htmls
 	for (var i = 0; i < numFixtures; i++) {
 		var f = fixtures[i];
 		var row = $("<tr></tr>").appendTo(t);
@@ -413,36 +616,60 @@ exports.contest.populatePlayedFixtures = function (fixtures) {
 	}
 };
 
-})();(function () {
+})();
+/**
+ * This provides an access layer to the dynamic elements which compris the
+ * contest setup screen. namely the lists of worlds and brains.
+ */
 
+(function () {
+
+/**
+ * private function
+ * gets a logical group and related methods for a contest list. the idea is
+ * that the brain list and world list are pretty much the same thing so
+ * abstract it into this one chunk of code.
+ */
 function getContestList (baseElem) {
 	var list = new LogicalGroup([
 		{
+			// The button to add a brain/world to the contest list
 			name: "add",
 			binder: function (callback) {
 				$("#ag-c-add-" + baseElem).click(callback);
 			}
 		},
 		{
+			// the button to dismiss a particular brain/world from the contest
+			// lists (bound dynamically)
 			name: "dismiss",
 			binder: function () {}
 		},
 	], {});
+
+	/**
+	 * adds an item to the list
+	 * @param name The name of the item
+	 * @param id The unique id number of the item
+	 */
 	list.add = function (name, id) {
 		// compile individual html elements
 		var list_item = item_name = dismiss_btn = "";
-		list_item  += "<tr class='ag-c-" + baseElem + "-item' id='" + id + "'>";
-		
-		item_name += "<td>";
-		item_name +=   name;
-		
-		dismiss_btn += "<a class='btn btn-mini btn-warning pull-right rightmost' href='#'>";
-		dismiss_btn +=   "dismiss &raquo;";
-		dismiss_btn += "</a>";
 
-		item_name +=   "</td>";
+		list_item   += "<tr class='ag-c-" + baseElem + 
+		                                "-item' id='" + id + "'>";
+		
+		item_name   +=   "<td>";
+		item_name   +=      name;
+		
+		dismiss_btn +=      "<a class='btn btn-mini btn-warning " + 
+		                          "pull-right rightmost' href='#'>";
+		dismiss_btn +=        "dismiss &raquo;";
+		dismiss_btn +=      "</a>";
 
-		list_item  += "</tr>";
+		item_name   +=   "</td>";
+
+		list_item   += "</tr>";
 
 		// attach the html elements to the DOM and set up events & callbacks
 
@@ -468,15 +695,25 @@ function getContestList (baseElem) {
 		);
 	};
 
+	/**
+	 * clears the list
+	 */
 	list.clear = function () {
 		$("#ag-c-" + baseElem + "-list").html("");
 	};
 
+	/**
+	 * Removes an item from the list
+	 * @param id The id of the item to remove
+	 */
 	list.remove = function (id) {
 		$(".ag-c-" + baseElem + "-item[id='" + id + "']").remove();
 	};
 
-	list.sayEmpty = function (id) {
+	/**
+	 * empties the list and causes a "none selected" message to be displayed
+	 */
+	list.sayEmpty = function () {
 		$("#ag-c-" + baseElem + "-list").html('<tr><td><span style="font-style: italic">none selected</span></td></tr>');
 	};
 
@@ -489,23 +726,29 @@ exports.contest.brains = getContestList("brains");
 
 })();
 var LogicalGroup = LogicalGroup || function () {};
-
+/**
+ * this provides an access layer to the dynamic elements which comprise the
+ * brain/world source/name editor dialog.
+ */
 (function () {
 
 var events = [
 	{
+		// the button to dismiss the editor dialog without saving changes
 		name: "cancel",
 		binder: function (callback) {
 			$(".ag-edit-close").click(callback);
 		},
 	},
 	{
+		// the button to try to compile whatever is in the editor
 		name: "compile",
 		binder: function (callback) {
 			$("#ag-edit-compile").click(callback);
 		}
 	},
 	{
+		// triggered when the name input field changes
 		name: "name_change",
 		binder: function (callback) {
 			$("#ag-edit-name").change(function () {
@@ -516,14 +759,17 @@ var events = [
 ];
 
 var textElems = {
+	// the title in the header of the dialog (e.g. "edit brain")
 	title: {
 		get: function () { return $("#ag-edit-title").html(); },
 		set: function (text) { $("#ag-edit-title").html(text); }
 	},
+	// the name input field
 	name: {
 		get: function () { return $("#ag-edit-name").attr("value"); },
 		set: function (text) { $("#ag-edit-name").attr("value", text); }
 	},
+	// the code textarea
 	code: {
 		get: function () { return $("#ag-edit-code").attr("value"); },
 		set: function (text) { $("#ag-edit-code").attr("value", text); }
@@ -532,32 +778,42 @@ var textElems = {
 
 exports.edit = new LogicalGroup(events, textElems);
 
+/**
+ * shows the editor dialog
+ */
 exports.edit.show = function () {
 	$("#ag-edit").modal("show");
 };
 
+/**
+ * hides the editor dialog
+ */
 exports.edit.hide = function () {
 	$("#ag-edit").modal("hide");
 };
 
-})();var LogicalGroup = LogicalGroup || function () {};
+})();
+var LogicalGroup = LogicalGroup || function () {};
 
 (function () {
 	
 var events = [
 	{
+		// any button which takes the user to the root of the main menu
 		name: "goto_root",
 		binder: function (callback) {
 			$(".ag-btn-root").click(callback);
 		}
 	},
 	{
+		// any button which takes the user to the single match setup screen
 		name: "goto_single_match",
 		binder: function (callback) {
 			$(".ag-btn-sm").click(callback);
 		}
 	},
 	{
+		// any button which takes the user to the contest setup screen
 		name: "goto_contest",
 		binder: function (callback) {
 			$(".ag-btn-contest").click(callback);
@@ -567,6 +823,8 @@ var events = [
 
 exports.menu = new LogicalGroup(events, {});
 
+// these 'locations' are used to show and hide DOM elements in accordance with
+// when they should be shown and hidden.
 var locations = {
 	root: {
 		prerequisites: [],
@@ -620,6 +878,10 @@ var locations = {
 	}
 };
 
+/**
+ * navigates to the specified menu location
+ * @param location The location
+ */
 exports.menu.goto = function (location) {
 	// if the location exists
 	if (locations[location]) {
@@ -641,41 +903,55 @@ exports.menu.goto = function (location) {
 	}
 };
 
+/**
+ * hides the navigation stuff
+ */
 exports.menu.hideBreadcrumbs = function () {
 	$("#ag-bread").hide();
 	$("#ag-navbar").hide();
 };
 
+/**
+ * shows the navigation stuff 
+ */
 exports.menu.showBreadcrumbs = function () {
 	$("#ag-bread").show();
 	$("#ag-navbar").show();
 };
 
 
-})();var LogicalGroup = LogicalGroup || function () {};
-
+})();
+var LogicalGroup = LogicalGroup || function () {};
+/**
+ * This provides an access layer to the dynamic elements which constitute 
+ * the single match setup screen, and also the single match results dialog
+ */
 (function () {
 
 var events = [
 	{
+		// The button which lets the user pick the red brain
 		name: "pick_red",
 		binder: function (callback) {
 			$("#ag-sm-pick-red").click(callback);
 		}
 	},
 	{
+		// The button which lets the user pick the black brain
 		name: "pick_black",
 		binder: function (callback) {
 			$("#ag-sm-pick-black").click(callback);
 		}
 	},
 	{
+		// The button which lets the user pick the world
 		name: "pick_world",
 		binder: function (callback) {
 			$("#ag-sm-pick-world").click(callback);
 		}
 	},
 	{
+		// triggered when the text in the number of rounds input field changes
 		name: "rounds_change",
 		binder: function (callback) {
 			$("#ag-sm-rounds").change(function () {
@@ -684,12 +960,14 @@ var events = [
 		}
 	},
 	{
+		// the button to start the game
 		name: "go",
 		binder: function (callback) {
 			$("#ag-sm-run").click(callback);
 		}
 	},
 	{
+		// the button to toggle graphics off
 		name: "vis_off",
 		binder: function (callback) {
 			$(".ag-vis-on").click(function () {
@@ -700,6 +978,7 @@ var events = [
 		}
 	},
 	{
+		// the button to toggle graphics on
 		name: "vis_on",
 		binder: function (callback) {
 			$(".ag-vis-off").click(function () {
@@ -710,6 +989,7 @@ var events = [
 		}
 	},
 	{
+		// triggered when the results dialog is closed
 		name: "results_close",
 		binder: function (callback) {
 			$("#ag-sm-results").on("hide", callback);
@@ -718,6 +998,7 @@ var events = [
 ];
 
 var textElems = {
+	// the name of the currently chosen red team
 	red_name: {
 		get: function () { return $("#ag-sm-red-name").text(); },
 		set: function (text) {
@@ -725,6 +1006,7 @@ var textElems = {
 			$("#ag-sm-results-red-name").text(text); 
 		}
 	},
+	// the name of the currently chosen black team
 	black_name: {
 		get: function () { return $("#ag-sm-black-name").text(); },
 		set: function (text) {
@@ -732,28 +1014,34 @@ var textElems = {
 			$("#ag-sm-results-black-name").text(text);
 		}
 	},
+	// the name of the currently chosen world
 	world_name: {
 		get: function () { return $("#ag-sm-world-name").text(); },
 		set: function (text) { 
 			$("#ag-sm-world-name").text(text); 
 		}
 	},
+	// the number of rounds as specified in the input field
 	rounds: {
 		get: function () { return $("#ag-sm-rounds").attr("value"); },
 		set: function (text) { $("#ag-sm-rounds").attr("value", text); }
 	},
+	// how many food particles the red team managed to gather
 	results_red_food: {
 		get: function () {},
 		set: function (text) { $("#ag-sm-results-red-food").text(text); }
 	},
+	// how many food particles the black team managed to gather
 	results_black_food: {
 		get: function () {},
 		set: function (text) { $("#ag-sm-results-black-food").text(text); }
 	},
+	// how many members of the red team died
 	results_red_deaths: {
 		get: function () {},
 		set: function (text) { $("#ag-sm-results-red-deaths").text(text); }
 	},
+	// how many members of the black team died
 	results_black_deaths: {
 		get: function () {},
 		set: function (text) { $("#ag-sm-results-black-deaths").text(text); }
@@ -763,6 +1051,10 @@ var textElems = {
 
 exports.single_match = new LogicalGroup(events, textElems);
 
+/**
+ * shows the results dialog
+ * @param results The results of a single match
+ */
 exports.single_match.showResults = function (results) {
 	console.log(results);
 	this.text("results_red_food", "" + results.red.food);
@@ -773,22 +1065,30 @@ exports.single_match.showResults = function (results) {
 };
 
 })();
+/**
+ * this provides an access layer to the dynamic elements which comprise the
+ * graphical game running screen. I.E. the stuff that shows a world and ants
+ * moving around in it doing thier things etc.
+ */
 (function () {
 
 var events = [
 	{
+		// the button to cancel the running of the game
 		name: "cancel",
 		binder: function (callback) {
 			$("#ag-run-cancel").click(callback);
 		}
 	},
 	{
+		// the buttonn to increase speed
 		name: "speed_up",
 		binder: function (callback) {
 			$("#ag-run-speed-up").click(callback);
 		}
 	},
 	{
+		// the button to decrease speed
 		name: "speed_down",
 		binder: function (callback) {
 			$("#ag-run-speed-down").click(callback);
@@ -797,14 +1097,17 @@ var events = [
 ];
 
 var textElems = {
+	// the name of the red team
 	red_name: {
 		get: function () {},
 		set: function (text) { $("#ag-run-red-name").text(text); }
 	},
+	// the name of the black team
 	black_name: {
 		get: function () {},
 		set: function (text) { $("#ag-run-black-name").text(text); }
 	},
+	// the speed the game is running at
 	speed: {
 		get: function () {},
 		set: function (text) { $("#ag-run-speed").text(text); }
@@ -812,6 +1115,12 @@ var textElems = {
 };
 
 exports.game = new LogicalGroup(events, textElems);
+
+
+/*****************************************************************************/
+/*********** This is where all of the graphical stuff is managed *************/
+/*****************************************************************************/
+
 
 var maxDx = 14; // one half of the maximum horizontal width of a hexagon
 
@@ -835,28 +1144,39 @@ var canvasWidth;
 var canvasHeight;
 
 var markerColors = {
-	red : ["#bc7f65","#d47c62","#e28b72","#e19996","#e28b8e","#d9a0a1"],
-	black : ["#a6c4b7","#97b3bc","#979dbc","#a6b7b7","#838cba","#867ca4"]
+	red: ["#bc7f65", "#d47c62", "#e28b72", "#e19996", "#e28b8e", "#d9a0a1"],
+	black: ["#a6c4b7", "#97b3bc", "#979dbc", "#a6b7b7", "#838cba", "#867ca4"]
 };
 
 var markerSize;
 
-function viewport()
-{
-	var e = window
-	, a = 'inner';
-	if (!( 'innerWidth' in window)){
-		a = 'client';
-		e = document.documentElement || document.body;
+/**
+ * private function
+ * gets the viewport width and height
+ * I took this code snippet from http://stackoverflow.com/a/7766007/1382997
+ * @returns the viewport width and height
+ */
+function viewport() {
+	var global = window
+	, x = 'inner';
+	if (!( 'innerWidth' in window)) {
+		x = 'client';
+		global = document.documentElement || document.body;
 	}
-	return { width : e[ a+'Width' ] , height : e[ a+'Height' ] }
+	return { 
+		width: global[ x + 'Width' ],
+		height: global[ x + 'Height' ]
+	}
 }
 
+/**
+ * Sets up the visuals for the beginning of a game
+ * @param grid The parsed grid of a world (i.e. the result of a call to 
+ * parseAntWorld)
+ */
 exports.game.setup = function (grid) {
 
 	var pageWidth = viewport().width - 18;
-
-	
 
 	// find initial dx
 	dx = pageWidth / (2 * grid.width + 1);
@@ -876,7 +1196,9 @@ exports.game.setup = function (grid) {
 		black: [[], []]
 	};
 
+	// for each rotation
 	for (var d = 0; d < 6; d++) {
+		// with and without food
 		for (var food = 0; food < 2; food++) {
 			antSprites["red"][food].push(this.gfx_utils.getAntCanvas(dx, d, "#A00", food));
 			antSprites["black"][food].push(this.gfx_utils.getAntCanvas(dx, d, "#000", food));
@@ -942,9 +1264,12 @@ exports.game.setup = function (grid) {
 	// pre-render world sprite
 	var world_sprite = this.gfx_utils.getWorldCanvas(dx, grid, false);
 
-	
+	// get all the canvases
 	var bcanv = document.getElementById("ag-run-canv-base");
 	var mcanv = document.getElementById("ag-run-canv-marker");
+	// we have two canvases for food. one for odd rows, one for even.
+	// it is done this way because otherwise when we remove food, we could
+	// be deleting bits from the row above/below
 	var fcanv0 = document.getElementById("ag-run-canv-food-even");
 	var fcanv1 = document.getElementById("ag-run-canv-food-odd");
 	var acanv = document.getElementById("ag-run-canv-ants");
@@ -952,9 +1277,11 @@ exports.game.setup = function (grid) {
 	canvasWidth = world_sprite.width;
 	canvasHeight = world_sprite.height;
 
+	// set their sizes
 	bcanv.width = mcanv.width = fcanv0.width = fcanv1.width = acanv.width = canvasWidth;
 	bcanv.height = mcanv.height = fcanv0.height = fcanv1.height = acanv.height = canvasHeight;
 
+	// set contexts
 	mctx = mcanv.getContext("2d");
 	fctxs = [fcanv0.getContext("2d"), fcanv1.getContext("2d")];
 	actx = acanv.getContext("2d");
@@ -962,7 +1289,6 @@ exports.game.setup = function (grid) {
 
 	// draw world sprite onto base canvas
 	bcanv.getContext("2d").drawImage(world_sprite, 0, 0);
-
 
 	// draw initial foods
     for (var row = 0; row < grid.height; row++) {
@@ -976,13 +1302,25 @@ exports.game.setup = function (grid) {
 
 var topleft;
 
-var drawAnt = function (row, col, dir, color, food) {
-	topleft = hexTopLefts[row][col];
-	actx.drawImage(antSprites[color][food][dir], topleft.x, topleft.y);
+/**
+ * draws an ant onto the ant canvas
+ * @param ant The ant
+ */
+var drawAnt = function (ant) {
+	if (ant.alive) {
+		topleft = hexTopLefts[ant.cell.row][ant.cell.col];
+		actx.drawImage(antSprites[ant.color][ant.food][ant.dir], topleft.x, topleft.y);
+	}
 };
 
 exports.game.drawAnt = drawAnt;
 
+/**
+ * draws a particle of food onto a food canvas
+ * @param row The row at which the food particle is to be drawn
+ * @param col The column at which the food particle is to be drawn
+ * @param num The amount of food at this position
+ */
 var drawFood = function (row, col, num) {
 	topleft = hexTopLefts[row][col];
 	fctxs[row % 2].clearRect(topleft.x, topleft.y, spriteWidth, spriteHeight);
@@ -993,6 +1331,9 @@ var drawFood = function (row, col, num) {
 
 exports.game.drawFood = drawFood;
 
+/**
+ * clears the ant canvas to make it ready for a new frame
+ */
 var newFrame = function () {
 	actx.clearRect(0, 0, canvasWidth, canvasHeight);
 };
@@ -1000,11 +1341,27 @@ var newFrame = function () {
 exports.game.newFrame = newFrame;
 
 var mpos;
+
+/**
+ * draws a marker onto the marker canvas
+ * @param row The row of the cell containing the marker
+ * @param col The column of the cell containing the marker
+ * @param color The color of the ant who placed the marker
+ * @param marker The id of the marker to draw
+ */
 var mark = function (row, col, color, marker) {
 	mctx.fillStyle = markerColors[color][marker];
 	mpos = markerPositions[row][col][color][marker];
 	mctx.fillRect(mpos.x, mpos.y, markerSize, markerSize);
 };
+
+/**
+ * removes a marker from the marker canvas
+ * @param row The row of the cell containing the marker
+ * @param col The column of the cell containing the marker
+ * @param color The color of the ant who placed the marker
+ * @param marker The id of the marker to remove
+ */
 var unmark = function (row, col, color, marker) {
 	mpos = markerPositions[row][col][color][marker];
 	mctx.clearRect(mpos.x, mpos.y, markerSize, markerSize);
@@ -1015,10 +1372,23 @@ exports.game.unmark = unmark;
 
 
 
-})();exports.game = exports.game || {};
+})();
+exports.game = exports.game || {};
 
+/**
+ * gfx utils
+ * These functions pre-render the base graphical components of the game.
+ * i.e. food, ants, and the world itself. Markers are simple so are handled
+ * elsewhere.
+ */
 exports.game.gfx_utils = (function () {
 
+/**
+ * creates a food sprite
+ * @param dx One half the width of a hexagon in the world
+ * @param numFood The amount of food this sprite should convey
+ * @returns a food sprite
+ */
 var getFoodCanvas = function (dx, numFood) {
 	var canv = document.createElement('canvas');
 	canv.width = Math.ceil(2 * dx);
@@ -1026,29 +1396,57 @@ var getFoodCanvas = function (dx, numFood) {
 	canv.height =  Math.ceil(4 * dy)
 	var ctx = canv.getContext("2d");
 	var radius = dx / 5 * numFood * 0.87;
-	ctx.fillStyle = "#008000";
-	ctx.beginPath();
-	ctx.arc(canv.width / 2, canv.height / 2, radius, 0, Math.PI * 2, true);
-	ctx.closePath();
-	ctx.fill(); 
+	drawFoodCircle(ctx, canv.width / 2, canv.height / 2, radius)
 	return canv;
 };
 
+/**
+ * private function
+ * draws a food circle in a given context at the given size and location
+ * @param ctx The canvas 2D context
+ * @param x The x-coord of the center of the circle
+ * @param y The y-coord of the center of the circle
+ * @param radius The radius of the circle
+ */
+var drawFoodCircle = function (ctx, x, y, radius) {
+	ctx.fillStyle = "#008000";
+	ctx.beginPath();
+	ctx.arc(x, y, radius, 0, Math.PI * 2, true);
+	ctx.closePath();
+	ctx.fill(); 
+};
+
+/**
+ * creates a sprite of the given world
+ * @param dx One half the width of a hexagon in the world
+ * @param grid The world grid (i.e. the result of a call to parseAntWorld)
+ * @param drawFood boolean flag to specify whether or not cells containing food
+ *        should be drawn as such
+ * @returns The world sprite
+ */
 var getWorldCanvas = function (dx, grid, drawFood) {
+	// get world dimensions
 	var width = Math.ceil((grid.width * 2 * dx) + dx);
 	var dy = dx * Math.tan(Math.PI / 6);
-	var twody = 2 * dy;
-	var twodx = 2 * dx;
-
-	// get canvas height;
 	var height = Math.ceil(dy * ((3 * grid.height) + 1));
 
+	// create canvas
 	var canv = document.createElement('canvas');
 	canv.width = width;
 	canv.height = height;
-
 	var ctx = canv.getContext("2d");
 
+	// pre-compute these for speed
+	var twodx = 2 * dx;
+	var twody = 2 * dy;
+
+	/**
+	 * private function
+	 * draws a hexagon of the specified color into the context
+	 * @param row The row of the hexagon
+	 * @param col The column of the hexagon
+	 * @param color The color of the hexagon
+	 */
 	function drawHex(row, col, color) {
 		var x = col * (2 * dx);
 		if (row % 2 === 1) { x += dx; } // account for odd rows
@@ -1064,6 +1462,7 @@ var getWorldCanvas = function (dx, grid, drawFood) {
 		ctx.fill();
 	}
 
+	// colors of various cell types
 	var colors = {
 		"#": "#555555",
 		"f": "#008000",
@@ -1072,24 +1471,31 @@ var getWorldCanvas = function (dx, grid, drawFood) {
 		"-": "#978f79"
 	};
 
+	// don't bother drawing food if not asked to
 	if (!drawFood) {
 		colors["f"] = colors["."];
 	}
 
+	// fill the world in with rock color to begin
 	ctx.fillStyle = colors["#"];
 	ctx.fillRect(0, 0, width, height);
 
+	// iterate over grid cells and draw them onto context
 	for (var row = 0; row < grid.height; row++) {
 		for (var col = 0; col < grid.width; col++) {
 			drawHex(row, col, colors[grid.cells[row][col].type]);
 		}
 	}
 
-
 	return canv;
 };
 
 
+/**
+ * draws the world with a width of 420px
+ * @param grid The grid
+ * @returns The thumbnail sprite
+ */
 var getWorldThumbnail = function (grid) {
 	// get hexagon dimensions
 	var dx = 420 / ((2 * grid.width) + 1);
@@ -1097,22 +1503,65 @@ var getWorldThumbnail = function (grid) {
 };
 
 
-
-var getAntCanvas = function (dx, d, color) {
+/**
+ * draws an ant sprite
+ * @param dx One half the width of a hexagon in the world
+ * @param d The direction in which the ant is facing
+ * @color The color of the ant
+ * @food 1 if the ant is carrying food, 0 otherwise
+ * @returns The desired ant sprite
+ */
+var getAntCanvas = function (dx, d, color, food) {
+	// get sprite dimensions
 	var dy = dx * Math.tan(Math.PI / 6);
 	var width = Math.ceil(dx * 2);
 	var height = Math.ceil(dy * 4);
 
+	// create canvas
 	var canv = document.createElement("canvas");
 	canv.width = width;
 	canv.height = height;
-
 	var ctx = canv.getContext("2d");
 
+	// draw the ant
 	drawAntFunctions[d](ctx, 0.2 * dx, color);
+	
+	// if food, draw food
+	if (food === 1) {
+		// for some reason, the rotation stuff below gets 2 and 4 mixed up
+		if (d === 2) {
+			d = 4;
+		} else if (d === 4) {
+			d = 2;
+		}
+		var x = dx * 0.75,
+		    y = 0,
+		    theta = d * Math.PI / 3;
+		// rotate point
+		x = (Math.cos(theta) * x) - (Math.sin(theta) * y);
+		y = (Math.sin(theta) * x) + (Math.cos(theta) * y);
+		// translate point
+		x += dx;
+		y += 2 * dy;
+		drawFoodCircle(ctx, x, y, 0.3 * dx);
+	}
 	return canv;
 };
 
+
+/**
+ * private functions
+ * These draw ants at specific rotations, as indicated by the index of the
+ * function in the list. I made the ant image in adobe illustrator, and then
+ * converted the saved SVG file into these functions using an online tool
+ * which can be found here: http://www.professorcloud.com/svg-to-canvas/
+ * The output of that tool includes a ton of cruft, though. Also there is
+ * no option for scaling, so I made significant modifications
+ * to these functions.
+ * @param ctx The 2d canvas context
+ * @param scale The scale at which to draw the ant
+ * @param color The color of the ant to draw
+ */
 var drawAntFunctions = [];
 
 drawAntFunctions[0] = function(ctx, scale, color) {
@@ -1488,10 +1937,16 @@ return {
 	getWorldThumbnail: getWorldThumbnail
 }
 })();
+/**
+ * This provides an access layer to the screen which is shown when a game
+ * is running without (hence 'sans') graphics.
+ */
+
 (function () {
 
 var events = [
 	{
+		// the button to cancel game execution
 		name: "cancel",
 		binder: function (callback) {
 			$("#ag-run-sans-cancel").click(callback);
@@ -1500,18 +1955,22 @@ var events = [
 ];
 
 var textElems = {
+	// the name of the red team
 	red_name: {
 		get: function () { return $("#ag-run-sans-red").text(); },
 		set: function (text) { $("#ag-run-sans-red").text(text); }
 	},
+	// the name of the black team
 	black_name: {
 		get: function () { return $("#ag-run-sans-black").text(); },
 		set: function (text) { $("#ag-run-sans-black").text(text); }
 	},
+	// the name of the world
 	world_name: {
 		get: function () { return $("#ag-run-sans-world").text(); },
 		set: function (text) { $("#ag-run-sans-world").text(text); }
 	},
+	// the width of the progress bar
 	progress: {
 		get: function () {},
 		set: function (percent) {
@@ -1522,7 +1981,11 @@ var textElems = {
 
 exports.run_sans = new LogicalGroup(events, textElems);
 
-})();exports.init = function () {
+})();
+/**
+ * initialises the view components
+ */
+exports.init = function () {
 	this.menu.init();
 	this.single_match.init();
 	this.brain_list.init();
@@ -1535,5 +1998,6 @@ exports.run_sans = new LogicalGroup(events, textElems);
 	this.game.init();
 	$("#loading-bg").hide();
 };
+
 return exports;
 })();
