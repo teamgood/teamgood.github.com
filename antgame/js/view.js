@@ -755,6 +755,18 @@ var events = [
 				callback($("#ag-edit-name").val());
 			});
 		}
+	},
+	{
+		// triggered when the user presses enter
+		name: "enter_pressed",
+		binder: function (callback) {
+			$("#ag-edit-name").keypress(function (e) {
+				if (e.which === 13) {
+					e.preventDefault();
+					callback();
+				}
+			});
+		}
 	}
 ];
 
@@ -1237,7 +1249,7 @@ exports.game.setup = function (grid) {
 				for (var k = 0; k < 6; k++) {
 					// find their center positions
 					var x = center.x + (Math.abs(Math.abs(k - 2.5) - 2.5) / 2.5) * 0.8 * dx * offsets[color];
-					var y = center.y + (k - 2.5) / 2.5 * 2 * dy;
+					var y = center.y + (k - 2.5) / 2.5 * 1.5 * dy;
 					// subtract half of marker size to get them in the right place
 					x -= Math.ceil(markerSize / 2);
 					y -= Math.ceil(markerSize / 2);

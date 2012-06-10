@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Ant Game</title>
+	<link rel="stylesheet" type="text/css" href="./bootstrap/css/bootstrap.css" />
+	<link rel="stylesheet" type="text/css" href="./style.css" />
+
+</head>
+
+<body>
+
+	
+
+	<div class="navbar navbar-fixed-top" id="ag-navbar" style="position: absolute;">
+		<div class="navbar-inner">
+			<div class="container">
+				<a name="top"></a>
+				<a class=" brand ag-btn-root" href="./index.html">AntGame</a>
+				<span class="brand" style="color: #888">
+					&raquo; &nbsp;
+					Docs
+				</span>
+			</div>
+		</div>
+	</div>
+
+
+
+	<!-- MAIN MENU DEF -->
+	<div class="ag-root container">
+		<div class="row">
+			<div class="span12 welcome">
+				<div class="row">
+					<div class="span12">
+						<div class="well leftmost rightmost pull-left">
+							<h4>Contents</h4>
+							<ul>
+								<li><a href="#intro">Introduction</a></li>
+								<li><a href="#howto">How to Play</a></li>
+								<li><a href="#rules">Rules</a></li>
+								<li><a href="#matches">Single Matches</a></li>
+								<li><a href="#contests">Contests</a></li>
+								<li><a href="#running">While the Game is Running</a></li>
+								<li><a href="#brains">Brains</a>
+									<ul>
+										<li><a href="#brainsuse">How to Use Them</a></li>
+										<li><a href="#brainsadd">How to Add a New One</a></li>
+										<li><a href="#brainswrite">How to Write Them</a></li>
+										<li><a href="#brainsinstr">Instructions</a>
+										<li><a href="#brainsnotes">Notes</a></li>
+										<li><a href="#brainsexample">Example Brain</a></li>
+									</ul>
+								</li>
+								<li><a href="#worlds">Worlds</a>
+									<ul>
+										<li><a href="#worldsuse">How to Use Them</a></li>
+										<li><a href="#worldsadd">How to Add a New One</a></li>
+										<li><a href="#worldswrite">How to Write Them</a></li>
+										<li><a href="#worldsexample">Example World</a></li>
+										<li><a href="#worldsrules">Restrictions</a>
+									</ul>
+								</li>
+							</ul>
+						</div>
+						
+
+						<h1>User Documentation</h1>
+						<a name="intro"></a>
+						<div class="docsection">
+							<hr>
+							<h2>Introduction</h2>
+							<p>
+								Hello. Yes this is AntGame.
+							</p>
+							<p>
+								AntGame is a challenge of cunnning and logic. Consider a world with a finite food supply scattered throughout. It is your task, as the player, to collect as much food as possible. In order to succeed in this goal, you wield an army of ants, whom you must carefully instruct in the ways of their world. Without you, they are nothing. 
+							</p>
+							<p>
+								At the same time, another player has their own army of ants, who are trying to gather up the same limited food supply. The player with the most food at the end wins the game. Have you got what it takes to give your ants the competetive edge? 
+							</p>
+							
+						</div>
+
+						<a name="howto"></a>
+						<div class="docsection" style="clear: left">
+							<hr>
+							<h2>How to Play</h2>
+							<p>
+								When you load the game, you are greeted with the following screen: (you've probably already seen this)
+							</p>
+							<center><img src="./img/startscreen.png"></center>
+							<p>
+								Keep an eye on that white bar at the bottom. That's the breadcrumb trail. It tells you where you are and where you've been. You can use it to travel back up in the menu structure. Using your browser's back button will take you away from AntGame and we don't want that to happen so remember to use the breadcrumbs instead!
+							</p>
+							<p>
+								From this screen you can either start a <a href="matches">single match</a> or a <a href="#contests">contest.</a> To do this, simply click the big blue button which corresponds to your choice of game type.
+							</p>
+							<div class="pull-right"><a href="#top"><i class="icon-chevron-up"></i> top</a></div>
+						</div>
+
+						<a name="rules"></a>
+						<div class="docsection" style="clear: left">
+							<hr>
+							<h2>Rules</h2>
+							<p>
+								AntGame is fairly simple. Here are the rules:
+							</p>
+							<ul>
+								<li>The team who gathers the most food wins.</li>
+								<li>Food is counted as being "gathered" if it has been dropped on one of the team's home cells. Food that an ant is carrying is not counted, even if that ant is standing on a home cell.</li>
+								<li>When an ant is adjacent to 5 or more enemy ants it dies, depositing 3 food particles in the cell it was in.</li>
+								<li>At the start of the game, each home cell for a particular color ant is populated with an ant of that color facing east.</li>
+								<li>Ants cannot move onto rocky cells.</li>
+							</ul>
+							<p>There are also some <a href="#worldsrules">rules concerning the formation of worlds</a>.</p>
+							<div class="pull-right"><a href="#top"><i class="icon-chevron-up"></i> top</a></div>
+						</div>
+
+						<a name="matches"></a>
+						<div class="docsection" style="clear: left">
+							<hr>
+							<h2>Single Matches</h2>
+							<p>
+								The Single Match mode lets you select two <a href="#brains">brains</a>, and play them against each other on one <a href="#worlds">world</a>.
+							</p>
+							<p>
+								The Single Match setup screen looks like this:
+							</p>
+							<center><img src="./img/sm-setup.png"></center>
+							<p>
+								To choose which <a href="#brains">brains</a> and which <a href="#worlds">world</a> to use, simply click the corresponding blue "pick" button.
+							</p>
+							<p>
+								You may have noticed that the brains are colored red and black. This means that they will start in different places in the world, so if your brain doesn't perform particularly well, fear not! Try swapping the colors around and you may fare better. 
+							</p>
+							<p>
+								Before you run the game, you can change some settings. Notice a text field with some numbers? That's the number of rounds or <em>iterations</em> that the game will last for. Be careful not to pick a number which is too low, or your ants might not have enough time to gather food! The maximum number of rounds is 999,999.
+							</p>
+							<p>
+								Another setting which you can change is whether or not the game runs with graphics. If you're strapped for time, running the game without graphics is much faster. Click the orange button to toggle graphics on and off.
+							</p>
+							<p>
+								To <a href="#running">run the game</a>, click the green "go" button. When the game is finished, you will be presented with a window showing the results of the match. It should look a bit like this:
+							</p>
+							<center><img src="./img/sm-results.png"></center>
+							<p>
+								As you can see, it shows how much food was gathered by each team and how many ants died on each team too.
+							</p>
+							<p>Closing the results window takes you back to the single match setup screen.</p>
+							<div class="pull-right"><a href="#top"><i class="icon-chevron-up"></i> top</a></div>
+						</div>
+
+
+						<a name="contests"></a>
+						<div class="docsection" style="clear: left">
+							<hr>
+							<h2>Contests</h2>
+							<p>
+								The Contest mode lets you select two or more <a href="#brains">brains</a>, and play them against each other on one or more contest-legal <a href="#worlds">worlds</a>.
+							</p>
+							<p>
+								The Contest setup screen looks like this:
+							</p>
+							<center><img src="./img/contestsetup.png"></center>
+							<p>
+								To choose which <a href="#brains">brains</a> and which <a href="#worlds">worlds</a> to use, simply click the corresponding blue "select" button. When you return to the contest setup screen, it should look something like this:
+							</p>
+							<center><img src="./img/contestsetup2.png"></center>
+							<p>
+								Notice that when you hover over a brain or a world, an orange button appears which allows you to dismiss that world or brain. (i.e. to exclude it from the contest).
+							</p>
+							<p>
+								When you are happy with the chosen components, you can click the green "go" button to go to the Contest Home screen, which looks like this:
+							</p>
+							<center><img src="./img/contesthome.png"></center>
+							<p>
+								From here you can inspect the current rankinigs of the brains. You can see which fixtures have been played, and which remain unplayed.
+							</p>
+							<p>
+								To run the entire contest sequentially, click the green "play all" button. When the contest is over, you will be returned to the contest home screen where you can see how the brains fared. If you cancel a match at any point during the contest, the results of any completed fixtures will be saved and you will be returned to the contest home screen where you can see the current statistics.
+							</p>
+							<p>
+								Alternatively, you can play fixtures individually. Do this by hovering over an unplayed fixture and clicking the blue "play" button that appears.
+							</p>
+							<center><img src="./img/contestindividual.png"></center>
+							<p>
+								When viewing played fixtures, the name of the winning team is highlighted in red. Or, in the case of a draw, both team names are highlighted blue.
+							</p>
+							<center><img src="./img/contestplayed.png"></center>
+							<p>
+								You can toggle graphics on and off from the contest home screen using the orange button at the top-right of the screen.
+							</p>
+							<div class="pull-right"><a href="#top"><i class="icon-chevron-up"></i> top</a></div>
+						</div>
+
+						<a name="running"></a>
+						<div class="docsection">
+							<hr>
+							<h2>While the Game is Running</h2>
+							<a name="runningwith"></a>
+							<h3>With Graphics</h3>
+
+							<p>When you run the game with graphics enabled, you will be presented with a visual representation of the ant world. Something like this:</p>
+							<center><img src="./img/bigscreenshot.png"></center>
+							<p>The dark grey cells are rocks.</p>
+							<img src="./img/rocks.png" style="margin-left: 30px">
+							<p>The green circles are blobs of food. They change size depending on how much food is in the cell.</p>
+							<img src="./img/food.png" style="margin-left: 30px">
+							<p>The Red Home cells are slightly red.</p>
+							<img src="./img/redhome.png" style="margin-left: 30px">
+							<p>The Black Home cells are slightly black.</p>
+							<img src="./img/blackhome.png" style="margin-left: 30px">
+							<br>
+							<p>You have the ability to change the speed at which the game runs within the range 1-10. To do this, click the blue buttons in the top bar marked "+" (to increase speed) and "-" (to decrease speed).</p>
+							<center><img src="./img/controls.png"></center>
+							<p>You can cancel the game at any time by clicking the button marked "cancel". This will take you back to wherever you were before the game started.</p>
+
+							<a name="runningsans"></a>
+							<h3>Without Graphics</h3>
+
+							<p>If you run the game without graphics, you are simply presented with a progress bar which indicates how much of the game has been completed. You have the option to cancel the game (by clicking the button marked "cancel") which will take you back to wherever you were before the game started.</p>
+							
+							<center><img src="./img/worldexample.png"></center>
+							<p>The green circles are blobs of food. </p>
+
+							<div class="pull-right"><a href="#top"><i class="icon-chevron-up"></i> top</a></div>
+						</div>
+
+
+
+
+						<a name="brains"></a>
+						<div class="docsection">
+							<hr>
+							<h2>Brains</h2>
+							<a name="brainsuse"></a>
+							<h3>How To Use Them</h3>
+							<p>When asked to choose a brain or some brains, you are presented with the following screen:</p>
+							<center><img src="./img/brainlist.png"></center>
+							<p>On the left you see a list of available brains. On the right is shown the source code for the currently selected brain.</p>
+							<p>To choose a brain, simply click the green "use" button that appears when you hover over it in the list.</p>
+
+							<a name="brainsadd"></a>
+							<h3>How To Add a New One</h3>
+							<p>Brains can be added by clicking the blue "add" button shown in the screenshot above. A window will open that allows you to give your new brain a name, specify it's source code, and then compile it for use in AntGame. The window will look like this:</p>
+							<center><img src="./img/brainedit.png"></center>
+							<p>If your brain fails to compile, you will recieve an alert stating the error in your code. You can then fix the error and try to compile again. If you change your mind about adding a new brain, click cancel at any time to return to the list of available brains.</p>
+
+							<p>
+								If you've added a new brain, when you hover over it in the list of available brains, you will now have the option to delete it (the red button), or edit it (the yellow button). 
+							</p>
+							<center><img src="./img/braincustom.png"></center>
+							<p>
+								If you choose to edit a brain, it works just like adding a new one except that when you recompile, it will overwrite the one you chose to edit.
+							</p>
+							
+							<a name="brainswrite"></a>
+							<h3>How To Write Them</h3>
+							<p>In AntGame, an ant is a simple state machine. That is to say, ants can only be in one state at any given time. Each state specifies some instruction which tells an ant what to do next.</p>
+							<p>Brains are, in that respect, an ordered series of states. States are numbered from 0 to n-1 where n is the total number of states in the brain.</p>
+							<p>Instructions for each state are written in a text file. Every line that contains an instruction represents a single state. You can't specify the number of a particular state. Rather, they are numbered implicity by the order in which they appear in the file.</p>
+							<p>To begin, let's take a look at the full set of instructions our ants understand: (don't worry if <em>you</em> don't yet!)</p>
+							<a name="brainsinstr"></a>
+							<table class="table table-bordered table-striped">
+								<thead>
+								<th>Instruction</th><th>Parameters</th><th>Description</th>
+								</thead>
+								<tr>
+									<td class="antcode bleu">Sense</td> 
+									<td class="antcode">sensedir st1 st2 cond</td>
+									<td>Go to state <span class="antcode">st1</span> if <span class="antcode">cond</span> holds in <span class="antcode">sensedir</span> and to state <span class="antcode">st2</span> otherwise.</td>
+								</tr>
+								<tr>
+									<td class="antcode bleu">Mark</td>
+									<td class="antcode">i st</td>
+									<td>Set mark <span class="antcode">i</span> in current cell and go to <span class="antcode">st</span>.</td>
+								</tr>
+								<tr>
+									<td class="antcode bleu">Unmark</td>
+									<td class="antcode">i st</td>
+									<td>Clear mark <span class="antcode">i</span> in current cell and go to <span class="antcode">st</span>.</td>
+								</tr>
+								<tr>
+									<td class="antcode bleu">PickUp</td>
+									<td class="antcode">st1 st2</td>
+									<td>Pick up food from current cell and go to <span class="antcode">st1</span>; go to <span class="antcode">st2</span> if there is no food in the current cell.</td>
+								</tr>
+								<tr>
+									<td class="antcode bleu">Drop</td>
+									<td class="antcode">st</td>
+									<td>Drop food in current cell and go to <span class="antcode">st</span>.</td>
+								</tr>
+								<tr>
+									<td class="antcode bleu">Turn</td>
+									<td class="antcode">lr st</td>
+									<td>Turn left or right and go to <span class="antcode">st</span>.</td>
+								</tr>
+								<tr>
+									<td class="antcode bleu">Move</td>
+									<td class="antcode">st1 st2</td>
+									<td>Move forward and go to <span class="antcode">st1</span>. Go to <span class="antcode">st2</span> if the cell ahead is blocked.</td>
+								</tr>
+								<tr>
+									<td class="antcode bleu">Flip</td>
+									<td class="antcode">p st1 st2</td>
+									<td>Choose a random number x from 0 to <span class="antcode">p</span>-1; go to <span class="antcode">st1</span> if x=0 and <span class="antcode">st2</span> otherwise.</td>
+								</tr>
+
+							</table>
+							<br>
+							<p>Let me just explain those a bit more carefully...</p>
+							<ul>
+								<li>
+									<a name="brainssense"></a>
+									<h3 class="antcode bleu">Sense</h3>
+									<p>Above we see the example as follows:</p>
+									<pre class="well antcode thinner"><span class="bleu">Sense</span> sensedir st1 st2 cond</pre>
+									<p>There are a variety of different ways this can be used, for example:</p>
+									<pre class="well antcode thinner"><span class="bleu">Sense</span> Ahead 1 3 Food</pre>
+									<p>Would search to see if there is food directly in front of the ant, going to State 1 if there is, and going to State 3 if there isn't.</p>
+									
+									<p>The options for <span class="antcode">sensedir</span> are: </p>
+									<div class="pull-left"><img  src="./img/sensedirs.png" /></div>
+									<div class="pull-left">
+										<ul>
+											<li><span class="antcode" style="background: #8cc63f; color: black; padding: 1px 3px;">Here</span> (the cell the ant is currently occupying)</li>
+											<li><span class="antcode" style="background: #7ed3ed; color: black; padding: 1px 3px;">Ahead</span> (the cell directly ahead of the ant)</li>
+											<li><span class="antcode" style="background: #fcb040; color: black; padding: 1px 3px;">LeftAhead</span></li>
+											<li><span class="antcode" style="background: #f5ee30; color: black; padding: 1px 3px;">RightAhead</span></li>
+										</ul>
+									</div>
+									<div style="clear: both;"></div><br>
+									<p>An ant cannot sense behind the direction it is facing.</p>
+									<p>The options for <span class="antcode">cond</span> are:</p>
+									<ul>
+										<li><span class="antcode" style="color: black;">Friend</span>  (a friendly ant)</li>
+										<li><span class="antcode" style="color: black;">Foe</span>  (an enemy ant)</li>
+										<li><span class="antcode" style="color: black;">FriendWithFood</span></li>
+										<li><span class="antcode" style="color: black;">FoeWithFood</span></li>
+										<li><span class="antcode" style="color: black;">Food</span></li>
+										<li><span class="antcode" style="color: black;">Rock</span></li>
+										<li><span class="antcode" style="color: black;">Marker i</span>  (where i is the type of marker)</li>
+										<li><span class="antcode" style="color: black;">FoeMarker</span> (Ants can only check if an enemy marker is present, they cannot detect white type of marker it is)</li>
+										<li><span class="antcode" style="color: black;">Home</span> (Friendly ant nest)</li>
+										<li><span class="antcode" style="color: black;">FoeHome</span> (Enemy ant nest)</li>
+									</ul>
+									
+								</li>
+
+								<li>
+									<a name="brainsmark"></a>
+									<h3 class="antcode bleu">Mark</h3>
+									<p>Above we see:</p>
+									<pre class="well antcode thinner"><span class="bleu">Mark</span> i st</pre>
+									<p>An example use of this instruction would be:</p>
+									<pre class="well antcode thinner"><span class="bleu">Mark</span> 0 3</pre>
+									<p>This would put a marker of type 0 (Markers can be of type 0-5) in the cell the ant is currently in, then move to state 3, markers are key to creating an advanced brain.</p>
+								</li>
+
+								<li>
+									<a name="brainsunmark"></a>
+									<h3 class="antcode bleu">Unmark</h3>
+									<p>This instruction is the opposite of the mark function. It removes the specified marker from the cell the ant is currently in. An example:</p>
+									<pre class="well antcode thinner"><span class="bleu">Unmark</span> 3 0</pre>
+									<p>This would remove the marker of type 3 from the cell the ant is currently in, then move to state 0.</p>
+								</li>
+
+								<li>
+									<a name="brainspickup"></a>
+									<h3 class="antcode bleu">Pickup</h3>
+									<p>Above we see:</p>
+									<pre class="well antcode thinner"><span class="bleu">Pickup</span> st1 st2</pre>		
+									<p>This will cause the ant to attempt to pickup food from the cell it is currently in. If the ant is successful, it will go to the state specified by <span class="antcode">st1</span>. If there is no food in the current cell, then it will go to the state specified by <span class="antcode">st2</span></p>
+								</li>
+
+								<li>
+									<a name="brainsdrop"></a>
+									<h3 class="antcode bleu">Drop</h3>
+									<p>Above we see:</p>
+									<pre class="well antcode thinner"><span class="bleu">Drop</span> st</pre>	
+									<p>This instruction causes an ant to drop food if it is carrying any. Regardless of whether any food was dropped, the ant will then go to the state specified by <span class="antcode">st</span>.</p>
+								</li>
+								<li>
+									<a name="brainsturn"></a>
+									<h3 class="antcode bleu">Turn</h3>
+									<p>Above we see:</p>
+									<pre class="well antcode thinner"><span class="bleu">Turn</span> lr st</pre>	
+									<p>This instruction causes an ant to turn one step (60 degrees) in the direction specified by <span class="antcode">lr</span>, and then go to the state specified by <span class="antcode">st</span>.</p>
+									<p>The two possible values of <span class="antcode">lr</span> are:</p>
+									<ul>
+										<li><span class="antcode" style="color: black">Left</span></li>
+										<li><span class="antcode" style="color: black">Right</span></li>
+									</ul>
+								</li>
+								<li>
+									<a name="brainsmove"></a>
+									<h3 class="antcode bleu">Move</h3>
+									<p>Above we see:</p>
+									<pre class="well antcode thinner"><span class="bleu">Move</span> st1 st2</pre>	
+									<p>This instruction causes an ant to attempt to move one step in the direction it is facing. If the ant is successful, it will go to the state specified by <span class="antcode">st1</span>. If the cell ahead is blocked for some reason, then it will go to the state specified by <span class="antcode">st2</span></p>. Be weary of using this instruction because, if an ant is successful in moving, they cannot do anything for the next 14 iterations the game!
+								</li>
+								<li>
+									<a name="brainsflip"></a>
+									<h3 class="antcode bleu">Flip</h3>
+									<p>This instruction provides the ability to inject a degree of uncertainty into the actions of your ants.</p>
+									<p>Above we see:</p>
+									<pre class="well antcode thinner"><span class="bleu">Flip</span> p st1 st2</pre>	
+									<p><span class="antcode">p</span> is an integer with any value &ge; 0. This number gives a <em>probability</em> that the ant will end up in <span class="antcode">st1</span>. The value of this probability is 1/<span class="antcode">p</span>. (so if <span class="antcode">p</span> has value 0 or 1, the ant will always go to <span class="antcode">st1</span>). Otherwise, the ant will go to <span class="antcode">st2</span>.</p>
+									<p>To illustrate:</p>
+									<pre class="well antcode thinner"><span class="bleu">Flip</span> 3 1 7</pre>
+									This gives the ant a 1 in 3 chance of going to state 1 and, therefore, a 2 in 3 chance of going to state 7.
+								</li>
+							</ul>
+							<a name="brainsnotes"></a>
+							<h3>Notes</h3>
+							<p>Brain code is case-insensitive.</p>
+							<p>The code can also be commented using a semicolon to delimit the start of a comment. Anything which follows a semicolon until the end of the line is ignored by the compiler. To illustrate this, have a look at the example code below.</p>
+
+							<a name="brainsexample"></a>
+							<h3>An Example Brain</h3>
+							<p>To conclude, we will look at a complete (but simple) brain. This brain has been commented to help you understand what is going on. If you want to look at a completed brain in correct syntax, please look at one of the sample brains provided in the game, you can look at these by selecting "Single Match" "Pick" Then highlighting the brain you want to view the source code for.</p>
+
+							<pre class="well antcode"><span class="bleu">Sense</span> Ahead 1 3 Food <span style="color: black">; state 0: [SEARCH] is there food in front of me?</span>
+<span class="bleu">Move</span> 2 0 <span style="color: black">; state 1: YES: move onto food (return to state 0 on failure)</span>
+<span class="bleu">PickUp</span> 8 0 <span style="color: black">; state 2: pick up food and jump to state 8 (or 0 on failure)</span>
+<span class="bleu">Flip</span> 3 4 5 <span style="color: black">; state 3: NO: choose whether to...</span>
+<span class="bleu">Turn</span> Left 0 <span style="color: black">; state 4: turn left and return to state 0</span>
+<span class="bleu">Flip</span> 2 6 7 <span style="color: black">; state 5: ... or ...</span>
+<span class="bleu">Turn</span> Right 0 <span style="color: black">; state 6: turn right and return to state 0</span>
+<span class="bleu">Move</span> 0 3 <span style="color: black">; state 7: ... or move forward and return to state 0 (or 3 on failure)</span>
+<span class="bleu">Sense</span> Ahead 9 11 Home <span style="color: black">; state 8: [GO HOME] is the cell in front of me my anthill?</span>
+<span class="bleu">Move</span> 10 8 <span style="color: black">; state 9: YES: move onto anthill</span>
+<span class="bleu">Drop</span> 0 <span style="color: black">; state 10: drop food and return to searching</span>
+<span class="bleu">Flip</span> 3 12 13 <span style="color: black">; state 11: NO: choose whether to...</span>
+<span class="bleu">Turn</span> Left 8 <span style="color: black">; state 12: turn left and return to state 8</span>
+<span class="bleu">Flip</span> 2 14 15 <span style="color: black">; state 13: ...or...</span>
+<span class="bleu">Turn</span> Right 8 <span style="color: black">; state 14: turn right and return to state 8</span>
+<span class="bleu">Move</span> 8 11 <span style="color: black">; state 15: ...or move forward and return to state 8</span></pre>
+							<p>More complicated brains would have functions for finding enemy ants and killing them, protecting the colony, potentially even raiding the enemy colony.</p>
+
+							
+
+
+							<div class="pull-right"><a href="#top"><i class="icon-chevron-up"></i> top</a></div>
+						</div> <!-- END BRAINS SECTION -->
+						
+
+
+						<a name="worlds"></a>
+						<div class="docsection">
+							<hr>
+							<h2>Worlds</h2>
+							<p>In AntGame, worlds are 2D hexagonal grids. You can make your own, or generate random ones on-the-fly.</p> 
+							<p>Worlds consist of four types of cells:</p>
+							<ul>
+								<li>Rock</li>
+								<li>Clear</li>
+								<li>Red Home</li>
+								<li>Black Home</li>
+							</ul>
+
+							<a name="worldsuse"></a>
+							<h3>How To Use Them</h3>
+							<p>When asked to choose a world or some worlds, you are presented with the following screen:</p>
+							<center><img src="./img/worldlist.png"></center>
+							<p>On the left you see a list of available worlds. On the right is shown the thumbnail for the currently selected world.</p>
+							<p>To choose a world, simply click the green "use" button that appears when you hover over it in the list.</p>
+							<p>To generate random contest-legal worlds, click the green "generate" button.</p>
+
+							<a name="worldsadd"></a>
+							<h3>How To Add a New One</h3>
+							<p>Worlds can be added by clicking the blue "add" button shown in the screenshot above. A window will open that allows you to give your new world a name, specify it's source code, and then compile it for use in AntGame. The window will look like this:</p>
+							<center><img src="./img/worldedit.png"></center>
+							<p>If your world fails to compile, you will recieve an alert stating the error in your code. You can then fix the error and try to compile again. If you change your mind about adding a new world, click cancel at any time to return to the list of available worlds.</p>
+
+							<p>
+								If you've added a new world, when you hover over it in the list of available worlds, you will now have the option to delete it (the red button), or edit it (the yellow button). 
+							</p>
+							<center><img src="./img/worldcustom.png"></center>
+							<p>
+								If you choose to edit a world, it works just like adding a new one except that when you recompile, it will overwrite the one you chose to edit.
+							</p>
+
+							<a name="worldswrite"></a>
+							<h3>How To Write Them</h3>
+							<p>Like <a href="#brains">brains</a>, worlds are written in a text file.</p>
+							<p>The first two lines of the text file must contain an integer each (and nothing else). These integers specify the width and the height of the world respectively.</p>
+							<p>The following lines represent the hexagonal grid of the world. Cells are defined as single characters. The possible characters are:</p>
+							<ul>
+								<li><span class="antcode">#</span> - Rock</li>
+								<li><span class="antcode">.</span> - Clear Cell</li>
+								<li><span class="antcode">+</span> - Red Hill</li>
+								<li><span class="antcode">-</span> - Black Hill</li>
+								<li><span class="antcode"><span style="color: black">[</span>n<span style="color: black">]</span></span> - A number between 1 and 9 which denotes a clear cell containing <span class="antcode">n</span> food particles.</li>
+							</ul>
+
+							<p>Each line of the grid must contain exactly the number of characters as specified by the width of the world on the first line. There must also be exactly the number of grid lines as specified by the height of the world on the second line.</p>
+							<p>The characters in the grid are separated by spaces. Even-numbered lines (if we say that the first line of the file is line 1) have an extra space at the front.</p>
+							<a name="worldsexample"></a>
+							<p>Let's take a look at an example:</p>
+<pre class="antcode"><span style="color: black">10
+10</span>
+<span style="color: #666"># # # # # # # # # #</span>
+ <span style="color: #666"># </span>9 9 <span style="color: #c57a0f">. . . . </span>3 3 <span style="color: #666">#</span>
+<span style="color: #666"># </span>9 <span style="color: #666"># </span><span style="color: #c57a0f">. </span><span style="color: black">- - - - - </span><span style="color: #666">#</span>
+ <span style="color: #666"># </span><span style="color: #c57a0f">. </span><span style="color: #666"># </span><span style="color: black">- - - - - - </span><span style="color: #666">#</span>
+<span style="color: #666"># </span><span style="color: #c57a0f">. . </span>5 <span style="color: black">- - - - - </span><span style="color: #666">#</span>
+ <span style="color: #666"># </span><span style="color: #993333">+ + + + + </span>5 <span style="color: #c57a0f">. . </span><span style="color: #666">#</span>
+<span style="color: #666"># </span><span style="color: #993333">+ + + + + + </span><span style="color: #666"># </span><span style="color: #c57a0f">. </span><span style="color: #666">#</span>
+ <span style="color: #666"># </span><span style="color: #993333">+ + + + + </span><span style="color: #c57a0f">. </span><span style="color: #666"># </span>9 <span style="color: #666">#</span>
+<span style="color: #666"># </span>3 3 <span style="color: #c57a0f">. . . . </span>9 9 <span style="color: #666">#</span>
+ <span style="color: #666"># # # # # # # # # #</span></pre>
+
+ 							<a name="worldsrules"></a>
+							<h3>Restrictions</h3>
+							<p>All worlds must conform to the following rules:</p>
+							<ul>
+								<li>The perimeter of the world must be entirely rocky cells.</li>
+								<li>There must be at least one home cell for each color of ant.</li>
+								<li>There must be at least one food particle in the world.</li>
+							</ul>
+							<p>In order for a world to be used in a contest, it must conform to the following additional rules:</p>
+							<ul>
+								<li>The worlds must have width and height 150.</li>
+								<li>There must be 2 ant homes which must be hexagons with sides length 7.</li>
+								<li>Food must be arranged in 'blobs' shaped as parallelograms with sides length 5, where each cell contains 5 particles of food.</li>
+								<li>There must be 11 food blobs.</li>
+								<li>There must be 14 separate rocky areas.</li>
+								<li>Non-food elements can not be directly adjacent to each other.</li>
+							</ul>
+							<div clas
+							<div class="pull-right"><a href="#top"><i class="icon-chevron-up"></i> top</a></div>
+						</div>
+					</div>
+				</div>
+
+			</div>
+		</div>
+	</div>
+	<!-- END MAIN MENU DEF -->
+
+
+
+	<!-- LOAD JAVASCRIPT STUFFS -->
+	<script type="text/javascript" src="./js/jquery1.7.2.min.js"></script>
+
+	<script type="text/javascript" src="./bootstrap/js/bootstrap-button.js"></script>
+	
+</body>
+</html>

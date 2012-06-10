@@ -2,6 +2,17 @@
  * This is some extra styling (on top of bootstrap) to make the application
  * look nice.
  */
+.antcode {
+  font-family: "Menlo", "Monaco", "Consolas", "Courier New", monospace;
+  color: #009800;
+  font-weight: bold;
+}
+.bleu {
+  color: #341279;
+}
+.thinner {
+  padding: 10px;
+}
 .welcome {
   background: white;
   border-radius: 7px;
@@ -12,6 +23,9 @@
 }
 .welcome hr {
   margin-top: 0px;
+}
+.docsection {
+  padding: 10px;
 }
 body {
   background: #eeeeee;
