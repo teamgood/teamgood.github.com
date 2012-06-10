@@ -74,10 +74,10 @@
 								Hello. Yes this is AntGame.
 							</p>
 							<p>
-								AntGame is a challenge of cunnning and logic. Consider a world with a finite food supply scattered throughout. It is your task, as the player, to collect as much food as possible. In order to succeed in this goal, you wield an army of ants, whom you must carefully instruct in the ways of their world. Without you, they are nothing. 
+								AntGame is a challenge of cunning and logic. Consider a world with a finite food supply scattered throughout. It is your task, as the player, to collect as much food as possible. In order to succeed in this goal, you wield an army of ants, whom you must carefully instruct in the ways of their world. Without you, they are nothing. 
 							</p>
 							<p>
-								At the same time, another player has their own army of ants, who are trying to gather up the same limited food supply. The player with the most food at the end wins the game. Have you got what it takes to give your ants the competetive edge? 
+								At the same time, another player has their own army of ants, who are trying to gather up the same limited food supply. The player with the most food at the end wins the game. Have you got what it takes to give your ants the competitive edge? 
 							</p>
 							
 						</div>
@@ -110,7 +110,7 @@
 								<li>The team who gathers the most food wins.</li>
 								<li>Food is counted as being "gathered" if it has been dropped on one of the team's home cells. Food that an ant is carrying is not counted, even if that ant is standing on a home cell.</li>
 								<li>When an ant is adjacent to 5 or more enemy ants it dies, depositing 3 food particles in the cell it was in.</li>
-								<li>At the start of the game, each home cell for a particular color ant is populated with an ant of that color facing east.</li>
+								<li>At the start of the game, each home cell for a particular colour ant is populated with an ant of that colour facing east.</li>
 								<li>Ants cannot move onto rocky cells.</li>
 							</ul>
 							<p>There are also some <a href="#worldsrules">rules concerning the formation of worlds</a>.</p>
@@ -132,7 +132,7 @@
 								To choose which <a href="#brains">brains</a> and which <a href="#worlds">world</a> to use, simply click the corresponding blue "pick" button.
 							</p>
 							<p>
-								You may have noticed that the brains are colored red and black. This means that they will start in different places in the world, so if your brain doesn't perform particularly well, fear not! Try swapping the colors around and you may fare better. 
+								You may have noticed that the brains are coloured red and black. This means that they will start in different places in the world, so if your brain doesn't perform particularly well, fear not! Try swapping the colours around and you may fare better. 
 							</p>
 							<p>
 								Before you run the game, you can change some settings. Notice a text field with some numbers? That's the number of rounds or <em>iterations</em> that the game will last for. Be careful not to pick a number which is too low, or your ants might not have enough time to gather food! The maximum number of rounds is 999,999.
@@ -175,7 +175,7 @@
 							</p>
 							<center><img src="./img/contesthome.png"></center>
 							<p>
-								From here you can inspect the current rankinigs of the brains. You can see which fixtures have been played, and which remain unplayed.
+								From here you can inspect the current rankings of the brains. You can see which fixtures have been played, and which remain unplayed.
 							</p>
 							<p>
 								To run the entire contest sequentially, click the green "play all" button. When the contest is over, you will be returned to the contest home screen where you can see how the brains fared. If you cancel a match at any point during the contest, the results of any completed fixtures will be saved and you will be returned to the contest home screen where you can see the current statistics.
@@ -245,7 +245,7 @@
 							<h3>How To Add a New One</h3>
 							<p>Brains can be added by clicking the blue "add" button shown in the screenshot above. A window will open that allows you to give your new brain a name, specify it's source code, and then compile it for use in AntGame. The window will look like this:</p>
 							<center><img src="./img/brainedit.png"></center>
-							<p>If your brain fails to compile, you will recieve an alert stating the error in your code. You can then fix the error and try to compile again. If you change your mind about adding a new brain, click cancel at any time to return to the list of available brains.</p>
+							<p>If your brain fails to compile, you will receive an alert stating the error in your code. You can then fix the error and try to compile again. If you change your mind about adding a new brain, click cancel at any time to return to the list of available brains.</p>
 
 							<p>
 								If you've added a new brain, when you hover over it in the list of available brains, you will now have the option to delete it (the red button), or edit it (the yellow button). 
@@ -259,7 +259,7 @@
 							<h3>How To Write Them</h3>
 							<p>In AntGame, an ant is a simple state machine. That is to say, ants can only be in one state at any given time. Each state specifies some instruction which tells an ant what to do next.</p>
 							<p>Brains are, in that respect, an ordered series of states. States are numbered from 0 to n-1 where n is the total number of states in the brain.</p>
-							<p>Instructions for each state are written in a text file. Every line that contains an instruction represents a single state. You can't specify the number of a particular state. Rather, they are numbered implicity by the order in which they appear in the file.</p>
+							<p>Instructions for each state are written in a text file. Every line that contains an instruction represents a single state. You can't specify the number of a particular state. Rather, they are numbered implicitly by the order in which they appear in the file.</p>
 							<p>To begin, let's take a look at the full set of instructions our ants understand: (don't worry if <em>you</em> don't yet!)</p>
 							<a name="brainsinstr"></a>
 							<table class="table table-bordered table-striped">
@@ -371,7 +371,7 @@
 									<h3 class="antcode bleu">Pickup</h3>
 									<p>Above we see:</p>
 									<pre class="well antcode thinner"><span class="bleu">Pickup</span> st1 st2</pre>		
-									<p>This will cause the ant to attempt to pickup food from the cell it is currently in. If the ant is successful, it will go to the state specified by <span class="antcode">st1</span>. If there is no food in the current cell, then it will go to the state specified by <span class="antcode">st2</span></p>
+									<p>This will cause the ant to attempt to pick up food from the cell it is currently in. If the ant is successful, it will go to the state specified by <span class="antcode">st1</span>. If there is no food in the current cell, then it will go to the state specified by <span class="antcode">st2</span></p>
 								</li>
 
 								<li>
@@ -472,7 +472,7 @@
 							<h3>How To Add a New One</h3>
 							<p>Worlds can be added by clicking the blue "add" button shown in the screenshot above. A window will open that allows you to give your new world a name, specify it's source code, and then compile it for use in AntGame. The window will look like this:</p>
 							<center><img src="./img/worldedit.png"></center>
-							<p>If your world fails to compile, you will recieve an alert stating the error in your code. You can then fix the error and try to compile again. If you change your mind about adding a new world, click cancel at any time to return to the list of available worlds.</p>
+							<p>If your world fails to compile, you will receive an alert stating the error in your code. You can then fix the error and try to compile again. If you change your mind about adding a new world, click cancel at any time to return to the list of available worlds.</p>
 
 							<p>
 								If you've added a new world, when you hover over it in the list of available worlds, you will now have the option to delete it (the red button), or edit it (the yellow button). 
@@ -517,7 +517,7 @@
 							<p>All worlds must conform to the following rules:</p>
 							<ul>
 								<li>The perimeter of the world must be entirely rocky cells.</li>
-								<li>There must be at least one home cell for each color of ant.</li>
+								<li>There must be at least one home cell for each colour of ant.</li>
 								<li>There must be at least one food particle in the world.</li>
 							</ul>
 							<p>In order for a world to be used in a contest, it must conform to the following additional rules:</p>
@@ -527,7 +527,7 @@
 								<li>Food must be arranged in 'blobs' shaped as parallelograms with sides length 5, where each cell contains 5 particles of food.</li>
 								<li>There must be 11 food blobs.</li>
 								<li>There must be 14 separate rocky areas.</li>
-								<li>Non-food elements can not be directly adjacent to each other.</li>
+								<li>Non-food elements must not be directly adjacent to each other.</li>
 							</ul>
 							<div clas
 							<div class="pull-right"><a href="#top"><i class="icon-chevron-up"></i> top</a></div>
