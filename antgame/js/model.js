@@ -633,8 +633,6 @@ function AntGame(redBrain, blackBrain, world) {
 	};
 }
 exports.AntGame = AntGame;
-var WorldCell = WorldCell || function () {}; // to avoid lint errors
-
 /**
  * AntWorld
  * This function returns an object which provides access to a hexagonal grid of
